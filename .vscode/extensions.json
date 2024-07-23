@@ -2,6 +2,7 @@
     "recommendations": [
         "mhutchie.git-graph",
         "ms-python.python",
-        "devsense.phptools-vscode"
+        "devsense.phptools-vscode",
+        "ms-vscode.live-server"
     ]
 }
