@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "jquery": "^3.7.1"
+    "@types/jquery": "^3.5.30"
   }
 }
