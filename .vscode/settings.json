@@ -2,5 +2,10 @@
     "editor.tabSize": 4,
     "[html]": {
         "editor.tabSize": 2
+    },
+    "rest-client.environmentVariables": {
+        "local": {
+            "host": "localhost",
+        }
     }
 }
