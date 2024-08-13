@@ -1,27 +1,28 @@
 #!/bin/bash
 
-servername="bunkyo_2024proc5_server"
+sessionname="bunkyo_2024proc5_server"
 apacheConfigFilePath="httpd.conf"
 mariadbConfigFilePath="my.cnf"
 fastapifilePath="app.py"
 mode=$1
 
 function NewSession() {
-    if tmux list-sessions | grep -q "^$1*"; then
-        echo "$servername session is already on"
+    if tmux list-sessions | grep -q "$1"; then
+        echo "$sessionname session is already on"
     else
+        echo "starting server"
         tmux new -d -s $1 -n dummy
     fi
 }
 function NewWindow() {
-    if tmux list-windows -F '#S:#W' | grep -q "^$1\:$2"; then
+    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
         echo "$2 window is already on"
     else
         tmux new-window -a -t $1 -n $2
     fi
 }
 function KillWindow() {
-    if tmux list-windows -F '#S:#W' | grep -q "^$1:$2\$"; then
+    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
         echo "killing $2 window"
         tmux kill-window -t $1:$2
     else
@@ -39,18 +40,20 @@ if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
 fi
 
 if [ "$mode" == "start" ]; then
-    NewSession $servername
-    NewWindow $servername httpd
-    SendKey $servername httpd "httpd -d ./ -f $apacheConfigFilePath"
-    NewWindow $servername mariadb
-    SendKey $servername mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
-    NewWindow $servername fastapi
-    SendKey $servername fastapi "python3.11 $fastapifilePath"
-    KillWindow $servername dummy
+    NewSession $sessionname
+    NewWindow $sessionname httpd
+    NewWindow $sessionname mariadb
+    NewWindow $sessionname fastapi
+    SendKey $sessionname httpd "httpd -d ./ -f $apacheConfigFilePath"
+    SendKey $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
+    SendKey $sessionname fastapi "python3.11 $fastapifilePath"
+    KillWindow $sessionname dummy
+    #TODO: 二重起動を対策する
+    echo "server initialized!"
 elif [ "$mode" == "stop" ]; then
     echo "not implemented yet"
     #TODO: implement stop function
 elif [ "$mode" == "test" ]; then
-    SendKey $servername "httpd" "ls"
+    SendKey $sessionname "httpd" "ls"
 fi
 exit 0
