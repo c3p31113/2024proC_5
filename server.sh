@@ -7,7 +7,7 @@ fastapifilePath="app.py"
 mode=$1
 
 function NewSession() {
-    if tmux list-sessions | grep -q "$1"; then
+    if tmux list-sessions -F '#S' | grep -q "$1"; then
         echo "$sessionname session is already on"
     else
         echo "starting server"
@@ -15,11 +15,11 @@ function NewSession() {
     fi
 }
 function KillSession() {
-    if tmux list-windows -F '#S:#W' | grep -q "$1"; then
+    if tmux list-sessions -F '#S' | grep -q "$1"; then
         echo "killing $1 session"
         tmux kill-session -t "$1"
     else
-        echo "$2 wasn't found"
+        echo "$1 wasn't found"
     fi
 }
 function NewWindow() {
@@ -42,7 +42,7 @@ function SendKey() {
 }
 
 function SendHalt() {
-    tmux send-keys -t "$1":"$2" "$3" C-c
+    tmux send-keys -t "$1":"$2" C-c
 }
 
 modes=("start" "stop" "test")
