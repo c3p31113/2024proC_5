@@ -11,26 +11,38 @@ function NewSession() {
         echo "$sessionname session is already on"
     else
         echo "starting server"
-        tmux new -d -s $1 -n dummy
+        tmux new -d -s "$1" -n dummy
+    fi
+}
+function KillSession() {
+    if tmux list-windows -F '#S:#W' | grep -q "$1"; then
+        echo "killing $1 session"
+        tmux kill-session -t "$1"
+    else
+        echo "$2 wasn't found"
     fi
 }
 function NewWindow() {
     if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
         echo "$2 window is already on"
     else
-        tmux new-window -a -t $1 -n $2
+        tmux new-window -a -t "$1" -n "$2"
     fi
 }
 function KillWindow() {
     if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
         echo "killing $2 window"
-        tmux kill-window -t $1:$2
+        tmux kill-window -t "$1":"$2"
     else
         echo "$2 wasn't found"
     fi
 }
 function SendKey() {
     tmux send-keys -t "$1":"$2" "$3" C-m
+}
+
+function SendHalt() {
+    tmux send-keys -t "$1":"$2" "$3" C-c
 }
 
 modes=("start" "stop" "test")
@@ -51,8 +63,11 @@ if [ "$mode" == "start" ]; then
     #TODO: 二重起動を対策する
     echo "server initialized!"
 elif [ "$mode" == "stop" ]; then
-    echo "not implemented yet"
-    #TODO: implement stop function
+    SendHalt $sessionname fastapi
+    SendHalt $sessionname httpd
+    SendHalt $sessionname mariadb
+    #FIXME: プロセス終了は待つべき
+    KillSession $sessionname
 elif [ "$mode" == "test" ]; then
     SendKey $sessionname "httpd" "ls"
 fi
