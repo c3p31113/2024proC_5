@@ -6,16 +6,28 @@ mariadbConfigFilePath="my.cnf"
 fastapifilePath="app.py"
 mode=$1
 
-function NewSession() {
+function IsSessionAlive() {
     if tmux list-sessions -F '#S' | grep -q "$1"; then
-        echo "$sessionname session is already on"
+        return 0
+    fi
+    return 1
+}
+function IsWindowAlive() {
+    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
+        return 0
+    fi
+    return 1
+}
+function NewSession() {
+    if IsSessionAlive "$1"; then
+        echo "$1 session is already on"
     else
         echo "starting server"
         tmux new -d -s "$1" -n dummy
     fi
 }
 function KillSession() {
-    if tmux list-sessions -F '#S' | grep -q "$1"; then
+    if IsSessionAlive "$1"; then
         echo "killing $1 session"
         tmux kill-session -t "$1"
     else
@@ -23,14 +35,14 @@ function KillSession() {
     fi
 }
 function NewWindow() {
-    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
+    if IsWindowAlive "$1" "$2"; then
         echo "$2 window is already on"
     else
         tmux new-window -a -t "$1" -n "$2"
     fi
 }
 function KillWindow() {
-    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
+    if IsWindowAlive "$1" "$2"; then
         echo "killing $2 window"
         tmux kill-window -t "$1":"$2"
     else
@@ -40,7 +52,6 @@ function KillWindow() {
 function SendKey() {
     tmux send-keys -t "$1":"$2" "$3" C-m
 }
-
 function SendHalt() {
     tmux send-keys -t "$1":"$2" C-c
 }
@@ -52,6 +63,10 @@ if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
 fi
 
 if [ "$mode" == "start" ]; then
+    if IsSessionAlive $sessionname; then
+        echo "session is already on"
+        exit 1
+    fi
     NewSession $sessionname
     NewWindow $sessionname httpd
     NewWindow $sessionname mariadb
@@ -60,9 +75,12 @@ if [ "$mode" == "start" ]; then
     SendKey $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
     SendKey $sessionname fastapi "python3.11 $fastapifilePath"
     KillWindow $sessionname dummy
-    #TODO: 二重起動を対策する
     echo "server initialized!"
 elif [ "$mode" == "stop" ]; then
+    if ! IsSessionAlive $sessionname; then
+        echo "session wasn't found"
+        exit 1
+    fi
     SendHalt $sessionname fastapi
     SendHalt $sessionname httpd
     SendHalt $sessionname mariadb
