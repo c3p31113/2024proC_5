@@ -3,6 +3,9 @@
         "mhutchie.git-graph",
         "ms-python.python",
         "devsense.phptools-vscode",
-        "ms-vscode.live-server"
+        "ms-vscode.live-server",
+        "humao.rest-client",
+        "oderwat.indent-rainbow",
+        "shardulm94.trailing-spaces"
     ]
 }
