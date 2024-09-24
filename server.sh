@@ -55,6 +55,18 @@ function SendKey() {
 function SendHalt() {
     tmux send-keys -t "$1":"$2" C-c
 }
+function ProcessesOfSession() {
+    tty=$(tmux list-sessions -F "#{session_name} #{pane_tty}" | grep "^$1 " 2>/dev/null | awk '{print $2}')
+    for process in $(ps -o pid -t "$tty" | tail -n +2); do
+        if [[ $counter -eq "0" ]]; then
+            result=$(printf "%s%s" "$result" "$process")
+        else
+            result=$(printf "%s\n%s" "$result" "$process")
+        fi
+        ((counter++))
+    done
+    echo "$result" | tail -1
+}
 
 modes=("start" "stop" "test")
 if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
@@ -87,6 +99,10 @@ elif [[ "$mode" == "stop" ]]; then
     #FIXME: プロセス終了は待つべき
     KillSession $servername
 elif [ "$mode" == "test" ]; then
-    SendKey $servername "httpd" "ls"
+    # SendKey $servername "httpd" "ls"
+    # for process in $(ProcessesOfSession $servername); do
+    #     echo "$process"
+    # done
+    ProcessesOfSession $servername fastapi
 fi
 exit 0
