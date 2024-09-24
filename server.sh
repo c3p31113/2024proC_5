@@ -7,7 +7,7 @@ fastapifilePath="app.py"
 mode=$1
 
 function IsSessionAlive() {
-    if tmux list-sessions -F '#S' | grep -q "$1"; then
+    if tmux list-sessions -F '#{session_name}'  2>/dev/null| grep -q "$1"; then
         return 0
     fi
     return 1
@@ -29,7 +29,7 @@ function KillSession() {
     fi
 }
 function IsWindowAlive() {
-    if tmux list-windows -F '#S:#W' | grep -q "$1:$2"; then
+    if tmux list-windows -aF '#{session_name} #{window_name}' 2>/dev/null | grep -q "$1 $2"; then
         return 0
     fi
     return 1
@@ -55,31 +55,34 @@ function SendKey() {
 function SendHalt() {
     tmux send-keys -t "$1":"$2" C-c
 }
-function ProcessesOfSession() {
-    tty=$(tmux list-sessions -F "#{session_name} #{pane_tty}" | grep "^$1 " 2>/dev/null | awk '{print $2}')
-    for process in $(ps -o pid -t "$tty" | tail -n +2); do
-        if [[ $counter -eq "0" ]]; then
-            result=$(printf "%s%s" "$result" "$process")
-        else
-            result=$(printf "%s\n%s" "$result" "$process")
-        fi
-        ((counter++))
-    done
-    echo "$result" | tail -1
-}
 function ProcessesOfWindow() {
+    if ! IsWindowAlive; then
+        echo "session $1:$2 wasn't found"
+        exit 1
+    fi
     tty=$(tmux list-windows -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$1 $2 " 2>/dev/null | awk '{print $3}')
     for process in $(ps -o pid -t "$tty" | tail -n +2); do
-        if [[ $counter -eq "0" ]]; then
-            result=$(printf "%s%s" "$result" "$process")
-        else
-            result=$(printf "%s\n%s" "$result" "$process")
+        if [[ ! $(ps -p "$process" -o comm=) == "-zsh" ]]; then
+            if [[ $counter -eq "0" ]]; then
+                result=$(printf "%s%s" "$result" "$process")
+            else
+                result=$(printf "%s\n%s" "$result" "$process")
+            fi
+            ((counter++))
         fi
-        ((counter++))
     done
     echo "$result" | tail -1
 }
-
+function ProcessesOfSession() {
+    if ! IsSessionAlive; then
+        echo "session $1 wasn't found"
+        exit 1
+    fi
+    sessions=$(tmux list-windows -aF "#{session_name} #{window_name}" | grep "$1 " | awk '{print $2}')
+    for session in $sessions; do
+        ProcessesOfWindow "$1" "$session"
+    done
+}
 
 modes=("start" "stop" "test")
 if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
@@ -109,14 +112,23 @@ elif [[ "$mode" == "stop" ]]; then
     SendHalt $servername fastapi
     SendHalt $servername httpd
     SendHalt $servername mariadb
-    #FIXME: プロセス終了は待つべき
+    running=true
+    while [[ "$running" == "true" ]]; do
+        running=false
+        for process in $(ProcessesOfSession $servername); do
+            if ps -p "$process" >/dev/null; then
+                running=true
+                continue
+            fi
+            running=false
+        done
+        echo "shutdown..."
+        sleep 1
+    done
     KillSession $servername
 elif [ "$mode" == "test" ]; then
     # SendKey $servername "httpd" "ls"
-    # for process in $(ProcessesOfSession $servername); do
-    #     echo "$process"
-    # done
-    # ProcessesOfSession $servername fastapi
-    ProcessesOfWindow $servername fastapi
+    ProcessesOfSession $servername
+    # ProcessesOfWindow $servername mariadb
 fi
 exit 0
