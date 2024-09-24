@@ -67,6 +67,19 @@ function ProcessesOfSession() {
     done
     echo "$result" | tail -1
 }
+function ProcessesOfWindow() {
+    tty=$(tmux list-windows -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$1 $2 " 2>/dev/null | awk '{print $3}')
+    for process in $(ps -o pid -t "$tty" | tail -n +2); do
+        if [[ $counter -eq "0" ]]; then
+            result=$(printf "%s%s" "$result" "$process")
+        else
+            result=$(printf "%s\n%s" "$result" "$process")
+        fi
+        ((counter++))
+    done
+    echo "$result" | tail -1
+}
+
 
 modes=("start" "stop" "test")
 if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
@@ -103,6 +116,7 @@ elif [ "$mode" == "test" ]; then
     # for process in $(ProcessesOfSession $servername); do
     #     echo "$process"
     # done
-    ProcessesOfSession $servername fastapi
+    # ProcessesOfSession $servername fastapi
+    ProcessesOfWindow $servername fastapi
 fi
 exit 0
