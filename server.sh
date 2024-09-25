@@ -1,6 +1,6 @@
 #!/bin/bash
 
-servername="bunkyo_2024proc5"
+sessionname="bunkyo_2024proc5"
 apacheConfigFilePath="httpd.conf"
 mariadbConfigFilePath="my.cnf"
 fastapifilePath="app.py"
@@ -16,7 +16,7 @@ function NewSession() {
     if IsSessionAlive "$1"; then
         echo "$1 session is already on"
     else
-        echo "starting server"
+        echo "starting session"
         tmux new -d -s "$1" -n dummy
     fi
 }
@@ -43,7 +43,7 @@ function NewWindow() {
 }
 function KillWindow() {
     if IsWindowAlive "$1" "$2"; then
-        echo "killing $2 window"
+        echo "killing $1:$2 window"
         tmux kill-window -t "$1":"$2"
     else
         echo "$1:$2 wasn't found"
@@ -83,39 +83,11 @@ function ProcessesOfSession() {
         ProcessesOfWindow "$1" "$session"
     done
 }
-
-modes=("start" "stop" "test")
-if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
-    echo "select function: { start | stop }"
-    exit 1
-fi
-
-if [[ "$mode" == "start" ]]; then
-    if IsSessionAlive $servername; then
-        echo "session is already on"
-        exit 1
-    fi
-    NewSession $servername
-    NewWindow $servername httpd
-    NewWindow $servername mariadb
-    NewWindow $servername fastapi
-    SendKey $servername httpd "httpd -d ./ -f $apacheConfigFilePath"
-    SendKey $servername mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
-    SendKey $servername fastapi "python3.11 $fastapifilePath"
-    KillWindow $servername dummy
-    echo "server $servername initialized!"
-elif [[ "$mode" == "stop" ]]; then
-    if ! IsSessionAlive $servername; then
-        echo "server $servername wasn't found"
-        exit 1
-    fi
-    SendHalt $servername fastapi
-    SendHalt $servername httpd
-    SendHalt $servername mariadb
+function WaitUntilAllProcessDie() {
     running=true
     while [[ "$running" == "true" ]]; do
         running=false
-        for process in $(ProcessesOfSession $servername); do
+        for process in $1; do
             if ps -p "$process" >/dev/null; then
                 running=true
                 continue
@@ -125,10 +97,41 @@ elif [[ "$mode" == "stop" ]]; then
         echo "shutdown..."
         sleep 1
     done
-    KillSession $servername
+}
+
+modes=("start" "stop" "test")
+if ! printf '%s\n' "${modes[@]}" | grep -qx "$1"; then
+    echo "select function: { start | stop }"
+    exit 1
+fi
+
+if [[ "$mode" == "start" ]]; then
+    if IsSessionAlive $sessionname; then
+        echo "session is already on"
+        exit 1
+    fi
+    NewSession $sessionname
+    NewWindow $sessionname httpd
+    NewWindow $sessionname mariadb
+    NewWindow $sessionname fastapi
+    SendKey $sessionname httpd "httpd -d ./ -f $apacheConfigFilePath"
+    SendKey $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
+    SendKey $sessionname fastapi "python3.11 $fastapifilePath"
+    KillWindow $sessionname dummy
+    echo "session $sessionname initialized!"
+elif [[ "$mode" == "stop" ]]; then
+    if ! IsSessionAlive $sessionname; then
+        echo "session $sessionname wasn't found"
+        exit 1
+    fi
+    SendHalt $sessionname fastapi
+    SendHalt $sessionname httpd
+    SendHalt $sessionname mariadb
+    WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)"
+    KillSession $sessionname
 elif [ "$mode" == "test" ]; then
-    # SendKey $servername "httpd" "ls"
-    ProcessesOfSession $servername
-    # ProcessesOfWindow $servername mariadb
+    # SendKey $sessionname "httpd" "ls"
+    ProcessesOfSession $sessionname
+    # ProcessesOfWindow $sessionname mariadb
 fi
 exit 0
