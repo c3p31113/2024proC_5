@@ -7,7 +7,7 @@ fastapifilePath="app.py"
 mode=$1
 
 function IsSessionAlive() {
-    if tmux list-sessions -F '#{session_name}'  2>/dev/null| grep -q "$1"; then
+    if tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -q "$1"; then
         return 0
     fi
     return 1
