@@ -133,11 +133,11 @@ function ProcessesOfSession() {
     done
 }
 function WaitUntilAllProcessDie() {
-    local sessionname=$1
+    local processes=$1
     running=true
     while [[ "$running" == "true" ]]; do
         running=false
-        for process in $sessionname; do
+        for process in $processes; do
             if ps -p "$process" >/dev/null; then
                 running=true
                 continue
