@@ -85,7 +85,7 @@ function KillWindow() {
     local windowname=$2
     if IsWindowAlive "$sessionname" "$windowname"; then
         echo "killing $sessionname:$windowname window"
-        tmux kill-window -t "$sessionname":"$windowname"
+        tmux kill-window -t "$sessionname:$windowname"
     else
         echo "$sessionname:$windowname wasn't found"
     fi
@@ -93,13 +93,20 @@ function KillWindow() {
 function SendKey() {
     local sessionname=$1
     local windowname=$2
+    local paneid=$3
     local keys=$3
-    tmux send-keys -t "$sessionname":"$windowname" "$keys" C-m
+    if [[ $windowname == "" ]]; then
+        tmux send-keys -t "$sessionname" "$keys" C-m
+    elif [[ $paneid == "" ]]; then
+        tmux send-keys -t "$sessionname:$windowname" "$keys" C-m
+    else
+        tmux send-keys -t "$sessionname:$windowname.$paneid" "$keys" C-m
+    fi
 }
 function SendHalt() {
     local sessionname=$1
     local windowname=$2
-    tmux send-keys -t "$sessionname":"$windowname" C-c
+    tmux send-keys -t "$sessionname:$windowname" C-c
 }
 function ProcessesOfTty() {
     local tty=$1
