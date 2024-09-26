@@ -101,26 +101,26 @@ function SendHalt() {
     local windowname=$2
     tmux send-keys -t "$sessionname":"$windowname" C-c
 }
+function ProcessesOfTty() {
+    local tty=$1
+    result=()
+    for process in $(ps -o pid -t "$tty" | tail -n +2); do
+        if [[ ! $(ps -p "$process" -o comm=) == "-zsh" ]]; then
+            result+=("$process")
+        fi
+    done
+    echo "${result[*]}"
+}
 function ProcessesOfWindow() {
     local sessionname=$1
     local windowname=$2
     if ! IsWindowAlive; then
-        echo "session $sessionname:$windowname wasn't found"
+        echo "window $sessionname:$windowname wasn't found"
         exit 1
     fi
-    #TODO: window単位ではなくpane単位で処理するようにする
-    tty=$(tmux list-windows -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$sessionname $windowname " 2>/dev/null | awk '{print $3}')
-    for process in $(ps -o pid -t "$tty" | tail -n +2); do
-        if [[ ! $(ps -p "$process" -o comm=) == "-zsh" ]]; then
-            if [[ $counter -eq "0" ]]; then
-                result=$(printf "%s%s" "$result" "$process")
-            else
-                result=$(printf "%s\n%s" "$result" "$process")
-            fi
-            ((counter++))
-        fi
+    for tty in $(tmux list-panes -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$sessionname $windowname " | awk '{print $3}'); do
+        ProcessesOfTty "$tty"
     done
-    echo "$result" | tail -1
 }
 function ProcessesOfSession() {
     local sessionname=$1
