@@ -29,7 +29,7 @@ function main() {
         SendHalt $sessionname fastapi
         SendHalt $sessionname httpd
         SendHalt $sessionname mariadb
-        WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)"
+        WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)" #TODO: 非アクティブpaneにもSend_Haltする
         KillSession $sessionname
     elif [ "$mode" == "test" ]; then
         # SendKey $sessionname "httpd" "ls"
@@ -93,15 +93,14 @@ function KillWindow() {
 function SendKey() {
     local sessionname=$1
     local windowname=$2
-    local paneid=$3
     local keys=$3
-    if [[ $windowname == "" ]]; then
-        tmux send-keys -t "$sessionname" "$keys" C-m
-    elif [[ $paneid == "" ]]; then
+    # if [[ $windowname == "" ]]; then
+    #     tmux send-keys -t "$sessionname" "$keys" C-m
+    # elif [[ $paneid == "" ]]; then
         tmux send-keys -t "$sessionname:$windowname" "$keys" C-m
-    else
-        tmux send-keys -t "$sessionname:$windowname.$paneid" "$keys" C-m
-    fi
+    # else
+    #     tmux send-keys -t "$sessionname:$windowname.$paneid" "$keys" C-m
+    # fi
 }
 function SendHalt() {
     local sessionname=$1
