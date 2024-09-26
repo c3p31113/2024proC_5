@@ -108,6 +108,7 @@ function ProcessesOfWindow() {
         echo "session $sessionname:$windowname wasn't found"
         exit 1
     fi
+    #TODO: window単位ではなくpane単位で処理するようにする
     tty=$(tmux list-windows -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$sessionname $windowname " 2>/dev/null | awk '{print $3}')
     for process in $(ps -o pid -t "$tty" | tail -n +2); do
         if [[ ! $(ps -p "$process" -o comm=) == "-zsh" ]]; then
