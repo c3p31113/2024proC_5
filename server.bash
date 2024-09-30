@@ -16,9 +16,9 @@ function main() {
         NewWindow $sessionname httpd
         NewWindow $sessionname mariadb
         NewWindow $sessionname fastapi
-        SendKey $sessionname httpd "httpd -d ./ -f $apacheConfigFilePath"
-        SendKey $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
-        SendKey $sessionname fastapi "python3.11 $fastapifilePath"
+        SendKey1 $sessionname httpd "httpd -d ./ -f $apacheConfigFilePath"
+        SendKey1 $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
+        SendKey1 $sessionname fastapi "python3.11 $fastapifilePath"
         KillWindow $sessionname dummy
         echo "session $sessionname initialized!"
     elif [[ "$mode" == "stop" ]]; then
@@ -26,14 +26,15 @@ function main() {
             echo "session $sessionname wasn't found"
             exit 1
         fi
-        SendHalt $sessionname fastapi
-        SendHalt $sessionname httpd
-        SendHalt $sessionname mariadb
+        SendHalt1 $sessionname fastapi
+        SendHalt1 $sessionname httpd
+        SendHalt1 $sessionname mariadb
         WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)" #TODO: 非アクティブpaneにもSend_Haltする
         KillSession $sessionname
     elif [ "$mode" == "test" ]; then
         # SendKey $sessionname "httpd" "ls"
-        ProcessesOfSession $sessionname
+        # ProcessesOfSession $sessionname
+        PaneCountOfWindow $sessionname "fastapi"
         # ProcessesOfWindow $sessionname mariadb
     fi
     exit 0
@@ -90,7 +91,7 @@ function KillWindow() {
         echo "$sessionname:$windowname wasn't found"
     fi
 }
-function SendKey() {
+function SendKey1() {
     local sessionname=$1
     local windowname=$2
     local keys=$3
@@ -102,10 +103,28 @@ function SendKey() {
     #     tmux send-keys -t "$sessionname:$windowname.$paneid" "$keys" C-m
     # fi
 }
-function SendHalt() {
+function SendKey2() {
+    local sessionname=$1
+    local windowname=$2
+    local pane=$3
+    local keys=$4
+    tmux send-keys -t "$sessionname:$windowname.$pane" C-m
+}
+function SendHalt1() {
     local sessionname=$1
     local windowname=$2
     tmux send-keys -t "$sessionname:$windowname" C-c
+}
+function SendHalt2() {
+    local sessionname=$1
+    local windowname=$2
+    local pane=$3
+    tmux send-keys -t "$sessionname:$windowname.$pane" C-c
+}
+function PaneCountOfWindow() {
+    local sessionname=$1
+    local windowname=$2
+    tmux list-windows -aF "#{session_name} #{window_name} #{window_panes}" | grep "$sessionname $windowname" | awk '{print $3}'
 }
 function ProcessesOfTty() {
     local tty=$1
