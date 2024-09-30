@@ -21,7 +21,7 @@ function main() {
         SendKey $sessionname:httpd "httpd -d ./ -f $apacheConfigFilePath"
         SendKey $sessionname:mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
         SendKey $sessionname:fastapi "python3.11 $fastapifilePath"
-        KillWindowHard $sessionname dummy
+        KillWindow $sessionname dummy
         echo "session $sessionname initialized!"
     elif [[ "$mode" == "stop" ]]; then
         if ! IsSessionAlive $sessionname; then
@@ -84,7 +84,7 @@ function NewWindow() {
         tmux new-window -a -t "$sessionname" -n "$windowname"
     fi
 }
-function KillWindowHard() {
+function KillWindow() {
     local sessionname=$1
     local windowname=$2
     if IsWindowAlive "$sessionname" "$windowname"; then
