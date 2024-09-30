@@ -4,6 +4,8 @@ sessionname="bunkyo_2024proc5"
 apacheConfigFilePath="httpd.conf"
 mariadbConfigFilePath="my.cnf"
 fastapifilePath="app.py"
+
+modes=("start" "stop" "test")
 mode=$1
 
 function main() {
@@ -16,25 +18,26 @@ function main() {
         NewWindow $sessionname httpd
         NewWindow $sessionname mariadb
         NewWindow $sessionname fastapi
-        SendKey1 $sessionname httpd "httpd -d ./ -f $apacheConfigFilePath"
-        SendKey1 $sessionname mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
-        SendKey1 $sessionname fastapi "python3.11 $fastapifilePath"
-        KillWindow $sessionname dummy
+        SendKey $sessionname:httpd "httpd -d ./ -f $apacheConfigFilePath"
+        SendKey $sessionname:mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
+        SendKey $sessionname:fastapi "python3.11 $fastapifilePath"
+        KillWindowHard $sessionname dummy
         echo "session $sessionname initialized!"
     elif [[ "$mode" == "stop" ]]; then
         if ! IsSessionAlive $sessionname; then
             echo "session $sessionname wasn't found"
             exit 1
         fi
-        SendHalt1 $sessionname fastapi
-        SendHalt1 $sessionname httpd
-        SendHalt1 $sessionname mariadb
-        WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)" #TODO: 非アクティブpaneにもSend_Haltする
+        HaltWindow $sessionname fastapi
+        HaltWindow $sessionname httpd
+        HaltWindow $sessionname mariadb
+        WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)"
         KillSession $sessionname
     elif [ "$mode" == "test" ]; then
         # SendKey $sessionname "httpd" "ls"
         # ProcessesOfSession $sessionname
-        PaneCountOfWindow $sessionname "fastapi"
+        # PaneCountOfWindow $sessionname "fastapi"
+        HaltWindow $sessionname fastapi
         # ProcessesOfWindow $sessionname mariadb
     fi
     exit 0
@@ -67,7 +70,7 @@ function KillSession() {
 function IsWindowAlive() {
     local sessionname=$1
     local windowname=$2
-    if tmux list-windows -aF '#{session_name} #{window_name}' 2>/dev/null | grep -q "$sessionname $windowname"; then
+    if tmux list-windows -aF "#{session_name} #{window_name}" 2>/dev/null | grep -q "$sessionname $windowname"; then
         return 0
     fi
     return 1
@@ -81,7 +84,7 @@ function NewWindow() {
         tmux new-window -a -t "$sessionname" -n "$windowname"
     fi
 }
-function KillWindow() {
+function KillWindowHard() {
     local sessionname=$1
     local windowname=$2
     if IsWindowAlive "$sessionname" "$windowname"; then
@@ -91,35 +94,25 @@ function KillWindow() {
         echo "$sessionname:$windowname wasn't found"
     fi
 }
-function SendKey1() {
+function HaltWindow() {
     local sessionname=$1
     local windowname=$2
-    local keys=$3
-    # if [[ $windowname == "" ]]; then
-    #     tmux send-keys -t "$sessionname" "$keys" C-m
-    # elif [[ $paneid == "" ]]; then
-        tmux send-keys -t "$sessionname:$windowname" "$keys" C-m
-    # else
-    #     tmux send-keys -t "$sessionname:$windowname.$paneid" "$keys" C-m
-    # fi
+    if IsWindowAlive "$sessionname" "$windowname"; then
+        for ((i = 0; i < $(PaneCountOfWindow "$sessionname" "$windowname"); i++)); do
+            SendHalt "$sessionname:$windowname.$i"
+        done
+    else
+        echo "$sessionname:$windowname wasn't found"
+    fi
 }
-function SendKey2() {
-    local sessionname=$1
-    local windowname=$2
-    local pane=$3
-    local keys=$4
-    tmux send-keys -t "$sessionname:$windowname.$pane" C-m
+function SendKey() {
+    local target=$1
+    local keys=$2
+    tmux send-keys -t "$target" "$keys" C-m
 }
-function SendHalt1() {
-    local sessionname=$1
-    local windowname=$2
-    tmux send-keys -t "$sessionname:$windowname" C-c
-}
-function SendHalt2() {
-    local sessionname=$1
-    local windowname=$2
-    local pane=$3
-    tmux send-keys -t "$sessionname:$windowname.$pane" C-c
+function SendHalt() {
+    local target=$1
+    tmux send-keys -t "$target" C-c
 }
 function PaneCountOfWindow() {
     local sessionname=$1
@@ -153,9 +146,9 @@ function ProcessesOfSession() {
         echo "session $sessionname wasn't found"
         exit 1
     fi
-    sessions=$(tmux list-windows -aF "#{session_name} #{window_name}" | grep "$sessionname " | awk '{print $2}')
-    for session in $sessions; do
-        ProcessesOfWindow "$sessionname" "$session"
+    windows=$(tmux list-windows -aF "#{session_name} #{window_name}" | grep "$sessionname " | awk '{print $2}')
+    for window in $windows; do
+        ProcessesOfWindow "$sessionname" "$window"
     done
 }
 function WaitUntilAllProcessDie() {
@@ -175,7 +168,6 @@ function WaitUntilAllProcessDie() {
     done
 }
 
-modes=("start" "stop" "test")
 if ! printf '%s\n' "${modes[@]}" | grep -qx "$mode"; then
     echo "select function: { start | stop }"
     exit 1
