@@ -1,6 +1,7 @@
 logs/*
 tmp/*
 **/.DS_Store
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -12,4 +13,8 @@ tmp/*
 *.vsix
 
 node_modules/*
-!node_modules/.package-lock.json
+.package-lock.json
+
+phpmyadmin
+
+config/*
