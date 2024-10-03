@@ -1,8 +1,8 @@
 #!/bin/bash
 
 sessionname="bunkyo_2024proc5"
-apacheConfigFilePath="httpd.conf"
-mariadbConfigFilePath="my.cnf"
+apacheConfigFilePath="config/httpd.conf"
+mariadbConfigFilePath="config/my.cnf"
 fastapifilePath="app.py"
 
 modes=("start" "stop" "test")
@@ -29,8 +29,13 @@ function main() {
             exit 1
         fi
         HaltWindow $sessionname fastapi
-        HaltWindow $sessionname httpd
-        HaltWindow $sessionname mariadb
+        # HaltWindow $sessionname httpd
+        # HaltWindow $sessionname mariadb
+        httpd_PSID=$(pstree | grep -e "httpd -d ./ -f $apacheConfigFilePath" | grep -e "=" | grep -v "grep" | awk '{print $2}' | sed 's/0*\([0-9]*[0-9]$\)/\1/g')
+        SendKey $sessionname:httpd "kill $httpd_PSID" #きったねぇけどこれしかない　httpdコマンドの時点でバックグラウンド起動バッチなのを恨む
+        for ps in $(ProcessesOfSession $sessionname); do
+            kill "$ps"
+        done
         WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)"
         KillSession $sessionname
     elif [ "$mode" == "test" ]; then
@@ -132,7 +137,7 @@ function ProcessesOfTty() {
 function ProcessesOfWindow() {
     local sessionname=$1
     local windowname=$2
-    if ! IsWindowAlive; then
+    if ! IsWindowAlive "$sessionname" "$windowname"; then
         echo "window $sessionname:$windowname wasn't found"
         exit 1
     fi
