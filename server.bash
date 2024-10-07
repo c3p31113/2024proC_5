@@ -5,7 +5,6 @@ apacheConfigFilePath="config/httpd.conf"
 mariadbConfigFilePath="config/my.cnf"
 fastapifilePath="app.py"
 
-modes=("start" "stop" "test")
 mode=$1
 
 function main() {
@@ -48,6 +47,10 @@ function main() {
         # PaneCountOfWindow $sessionname "fastapi"
         HaltWindow $sessionname fastapi
         # ProcessesOfWindow $sessionname mariadb
+        ;;
+    *)
+        echo "select function: { start | stop }"
+        exit 1
         ;;
     esac
     exit 0
@@ -177,10 +180,5 @@ function WaitUntilAllProcessDie() {
         sleep 1
     done
 }
-
-if ! printf '%s\n' "${modes[@]}" | grep -qx "$mode"; then
-    echo "select function: { start | stop }"
-    exit 1
-fi
 
 main "$mode"
