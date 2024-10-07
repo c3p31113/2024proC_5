@@ -9,7 +9,9 @@ modes=("start" "stop" "test")
 mode=$1
 
 function main() {
-    if [[ "$mode" == "start" ]]; then
+    local mode=$1
+    case $mode in
+    start)
         if IsSessionAlive $sessionname; then
             echo "session is already on"
             exit 1
@@ -23,7 +25,8 @@ function main() {
         SendKey $sessionname:fastapi "python3.11 $fastapifilePath"
         KillWindow $sessionname dummy
         echo "session $sessionname initialized!"
-    elif [[ "$mode" == "stop" ]]; then
+        ;;
+    stop)
         if ! IsSessionAlive $sessionname; then
             echo "session $sessionname wasn't found"
             exit 1
@@ -38,13 +41,15 @@ function main() {
         done
         WaitUntilAllProcessDie "$(ProcessesOfSession $sessionname)"
         KillSession $sessionname
-    elif [ "$mode" == "test" ]; then
+        ;;
+    test)
         # SendKey $sessionname "httpd" "ls"
         # ProcessesOfSession $sessionname
         # PaneCountOfWindow $sessionname "fastapi"
         HaltWindow $sessionname fastapi
         # ProcessesOfWindow $sessionname mariadb
-    fi
+        ;;
+    esac
     exit 0
 }
 function IsSessionAlive() {
