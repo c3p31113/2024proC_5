@@ -15,6 +15,8 @@ tmp/*
 node_modules/*
 .package-lock.json
 
+__pycache__
+
 phpmyadmin
 
 config/*
