@@ -49,8 +49,41 @@ function main() {
         HaltWindow $sessionname fastapi
         # ProcessesOfWindow $sessionname mariadb
         ;;
+    status)
+        error=0
+        if ! IsSessionAlive $sessionname; then
+            echo "session is not alive!"
+            error=1
+            exit 1
+        fi
+        if ! IsWindowAlive $sessionname fastapi; then
+            echo "fastapi window is not alive!"
+            error=1
+        elif ProcessesOfWindow $sessionname fastapi >/dev/null; then
+            echo "fastapi isn't working!"
+            error=1
+        fi
+        if ! IsWindowAlive $sessionname mariadb; then
+            echo "mariadb window is not alive!"
+            error=1
+        elif ProcessesOfWindow $sessionname mariadb >/dev/null; then
+            echo "mariadb isn't working!"
+            error=1
+        fi
+        if ! IsWindowAlive $sessionname httpd; then
+            echo "apache window is not alive!"
+            error=1
+        elif pstree | grep -e "httpd -d ./ -f $apacheConfigFilePath" | grep -e "=" | grep -v "grep" >/dev/null; then
+            echo "apache isn't working!"
+        fi
+        if [ $error -eq 0 ]; then
+            echo "all ok"
+        else
+            exit 1
+        fi
+        ;;
     *)
-        echo "select function: { start | stop }"
+        echo "select function: { start | stop | status }"
         exit 1
         ;;
     esac
@@ -84,7 +117,7 @@ function KillSession() {
 function IsWindowAlive() {
     local sessionname=$1
     local windowname=$2
-    if tmux list-windows -aF "#{session_name} #{window_name}" 2>/dev/null | grep -q "$sessionname $windowname"; then
+    if tmux list-windows -aF "#{session_name} #{window_name} " 2>/dev/null | grep -q "$sessionname $windowname "; then
         return 0
     fi
     return 1
@@ -148,7 +181,7 @@ function ProcessesOfWindow() {
     local windowname=$2
     if ! IsWindowAlive "$sessionname" "$windowname"; then
         echo "window $sessionname:$windowname wasn't found"
-        exit 1
+        return 1
     fi
     for tty in $(tmux list-panes -aF "#{session_name} #{window_name} #{pane_tty}" | grep "$sessionname $windowname " | awk '{print $3}'); do
         ProcessesOfTty "$tty"
@@ -158,7 +191,7 @@ function ProcessesOfSession() {
     local sessionname=$1
     if ! IsSessionAlive; then
         echo "session $sessionname wasn't found"
-        exit 1
+        return 1
     fi
     windows=$(tmux list-windows -aF "#{session_name} #{window_name}" | grep "$sessionname " | awk '{print $2}')
     for window in $windows; do
