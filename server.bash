@@ -21,7 +21,8 @@ function main() {
         NewWindow $sessionname fastapi
         SendKey $sessionname:httpd "httpd -d ./ -f $apacheConfigFilePath"
         SendKey $sessionname:mariadb "mysqld --defaults-file=$mariadbConfigFilePath"
-        SendKey $sessionname:fastapi "python3.11 $fastapifilePath"
+        SendKey $sessionname:fastapi "source .venv/bin/activate" # venvに指定してるのがちょっと気に食わないが
+        SendKey $sessionname:fastapi "python3.12 $fastapifilePath"
         KillWindow $sessionname dummy
         echo "session $sessionname initialized!"
         ;;
