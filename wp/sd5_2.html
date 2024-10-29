@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>農業経営システム</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -26,7 +27,7 @@
     }
 
     header h1 {
-      font-size: 3rem;
+      font-size: 2rem;
       /* h1のフォントサイズを大きく */
     }
 
@@ -36,34 +37,15 @@
       bottom: 0;
       display: flex;
       justify-content: flex-end;
-      /* 右寄せ */
       align-items: center;
       height: 60px;
-      padding-right: 80px;
-      /* さらに右側に余白を追加 */
+      padding-right: 20px;
+      /* 右側に少し余白 */
     }
 
     main {
       margin: 6rem 0;
       padding: 1rem;
-    }
-
-    .admin-login {
-      background-color: #6c757d;
-      border: none;
-      color: white;
-      padding: 0.5rem 1rem;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 1rem;
-      margin: 4px 2px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .admin-login:hover {
-      background-color: #5a6268;
     }
   </style>
 </head>
@@ -76,9 +58,12 @@
     <!-- メインコンテンツ -->
   </main>
   <footer>
-    <button class="admin-login" onclick="location.href='sd5_3.php'">管理者ログイン</button>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_3.php'">管理者ログイン</button>
   </footer>
 
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     document.querySelector('header h1').addEventListener('click', function () {
       window.location.href = 'sd5_1.html';
