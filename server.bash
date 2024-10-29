@@ -3,7 +3,7 @@
 sessionname="bunkyo_2024proc5"
 apacheConfigFilePath="config/httpd.conf"
 mariadbConfigFilePath="config/my.cnf"
-fastapifilePath="api/app.py"
+fastapifilePath="api/main.py"
 
 mode=$1
 

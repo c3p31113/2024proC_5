@@ -2,7 +2,14 @@
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
     "[html]": {
-        "editor.tabSize": 2
+        "editor.tabSize": 2,
+        "editor.suggest.insertMode": "replace"
+    },
+    "[json]": {
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.suggest.insertMode": "replace"
     },
     "rest-client.environmentVariables": {
         "local": {
