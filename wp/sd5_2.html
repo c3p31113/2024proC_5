@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>農業経営システム</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    header,
+    footer {
+      background-color: brown;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      /* h1のフォントサイズを大きく */
+    }
+
+    footer {
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+      display: flex;
+      justify-content: flex-end;
+      /* 右寄せ */
+      align-items: center;
+      height: 60px;
+      padding-right: 80px;
+      /* さらに右側に余白を追加 */
+    }
+
+    main {
+      margin: 6rem 0;
+      padding: 1rem;
+    }
+
+    .admin-login {
+      background-color: #6c757d;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 1rem;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .admin-login:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>農業経営システム</h1>
+  </header>
+  <main>
+    <!-- メインコンテンツ -->
+  </main>
+  <footer>
+    <button class="admin-login" onclick="location.href='sd5_3.php'">管理者ログイン</button>
+  </footer>
+
+  <script>
+    document.querySelector('header h1').addEventListener('click', function () {
+      window.location.href = 'sd5_1.html';
+    });
+  </script>
+</body>
+
+</html>
