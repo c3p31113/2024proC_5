@@ -59,21 +59,21 @@ function main() {
         if ! IsWindowAlive $sessionname fastapi; then
             echo "fastapi window is not alive!"
             error=1
-        elif ProcessesOfWindow $sessionname fastapi >/dev/null; then
+        elif ! ProcessesOfWindow $sessionname fastapi >/dev/null; then #FIXME 下のも全部だけどコレちゃんと検知できてない
             echo "fastapi isn't working!"
             error=1
         fi
         if ! IsWindowAlive $sessionname mariadb; then
             echo "mariadb window is not alive!"
             error=1
-        elif ProcessesOfWindow $sessionname mariadb >/dev/null; then
+        elif ! ProcessesOfWindow $sessionname mariadb >/dev/null; then
             echo "mariadb isn't working!"
             error=1
         fi
         if ! IsWindowAlive $sessionname httpd; then
             echo "apache window is not alive!"
             error=1
-        elif pstree | grep -e "httpd -d ./ -f $apacheConfigFilePath" | grep -e "=" | grep -v "grep" >/dev/null; then
+        elif ! pstree | grep -e "httpd -d ./ -f $apacheConfigFilePath" | grep -e "=" | grep -v "grep" >/dev/null; then
             echo "apache isn't working!"
         fi
         if [ $error -eq 0 ]; then
