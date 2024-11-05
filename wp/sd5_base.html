@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>農業経営システム</title>
+  <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -14,7 +14,8 @@
 
     header,
     footer {
-      background-color: brown;
+      background-color: #ae5123;
+      /* Slightly darker light brown */
       color: white;
       text-align: center;
       padding: 1rem;
@@ -24,11 +25,35 @@
       position: fixed;
       width: 100%;
       top: 0;
+      z-index: 1000;
     }
 
     header h1 {
       font-size: 2rem;
-      /* h1のフォントサイズを大きく */
+    }
+
+    .button-container {
+      display: flex;
+      background-color: #8b4513;
+      /* dark brown */
+      color: white;
+      width: 100%;
+      position: fixed;
+      top: 4rem;
+      /* header height */
+      z-index: 900;
+    }
+
+    .button-box {
+      flex: 1;
+      text-align: center;
+      padding: 1rem 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .button-box:hover {
+      background-color: chocolate;
     }
 
     footer {
@@ -40,11 +65,11 @@
       align-items: center;
       height: 60px;
       padding-right: 20px;
-      /* 右側に少し余白 */
     }
 
     main {
-      margin: 6rem 0;
+      margin-top: 8rem;
+      /* Adjusted for the header and button container */
       padding: 1rem;
     }
   </style>
@@ -52,11 +77,18 @@
 
 <body>
   <header>
-    <h1>農業経営システム</h1>
+    <h1>書類作成補助システム</h1>
   </header>
+
+  <div class="button-container">
+    <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
+  </div>
+
   <main>
     <!-- メインコンテンツ -->
   </main>
+
   <footer>
     <button type="button" class="btn btn-secondary" onclick="location.href='sd5_3.php'">管理者ログイン</button>
   </footer>
@@ -66,7 +98,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     document.querySelector('header h1').addEventListener('click', function () {
-      window.location.href = 'sd5_1.html';
+      window.location.href = 'sd5_home.html';
     });
   </script>
 </body>
