@@ -17,16 +17,17 @@ pip install -r requirements.txt
 
 2.実際に動かす
 普通にこのapp.pyファイルをターミナルでpythonで実行すればそれだけでAPIサーバーとして起動する
-起動時に、
-INFO: Uvicorn runnning on http://127.0.0.1:3000
-のような表示が出ると思う これがこのAPIサーバーのURL
-実際にテストでAPIリクエストを送る場合は、 http://127.0.0.1:3000 のURLを使う(試しにブラウザで開いてみてほしい)
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+というログが出れば、正常に起動している
+実際にAPIリクエストを送る場合は、 http://127.0.0.1:3000 のURLを使う(試しにブラウザで開いてみてほしい)
 URLの末尾にパスを追加する http://127.0.0.1:3000/v1/
 
 3.編集する
-@app.get("/") または @app.post("/")などを書いて、次の行に非同期関数を定義する
-この関数でオブジェクトを返り値にすると、それがwebAPIのJSON形式での返り値になる
+@app.get("/") または @app.post("/") などを書いて、次の行に非同期関数を定義する
+この際にget()かpost()かでRESTのメソッドが何かをしている
+get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
 
+この関数でオブジェクトを返り値にすると、それがwebAPIのJSON形式での返り値になる
 @app.get("/test")
 async def hoge():
     return {"hoge": "hoga"}
@@ -34,7 +35,6 @@ async def hoge():
 http://127.0.0.1:3000/test/
 
 クエリパラメータは関数の引数で定義する
-
 @app.get("/test")
 async def hoge(number: int = 0):
     return {"hoge": number + 1}
@@ -46,7 +46,8 @@ http://127.0.0.1:3000/test/?number=2
 
 
 def main():
-    uvicorn.run(app, host="127.0.0.1", port=3000, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=3000, log_level="debug")
+    # ここhostは0.0.0.0じゃないといけないらしい
 
 
 @app.get("/")
