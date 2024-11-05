@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>書類作成補助システム</title>
+  <title>農業経営システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -14,8 +14,7 @@
 
     header,
     footer {
-      background-color: #ae5123;
-      /* Slightly darker light brown */
+      background-color: brown;
       color: white;
       text-align: center;
       padding: 1rem;
@@ -25,35 +24,11 @@
       position: fixed;
       width: 100%;
       top: 0;
-      z-index: 1000;
     }
 
     header h1 {
       font-size: 2rem;
-    }
-
-    .button-container {
-      display: flex;
-      background-color: #8b4513;
-      /* dark brown */
-      color: white;
-      width: 100%;
-      position: fixed;
-      top: 4rem;
-      /* header height */
-      z-index: 900;
-    }
-
-    .button-box {
-      flex: 1;
-      text-align: center;
-      padding: 1rem 0;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .button-box:hover {
-      background-color: chocolate;
+      /* h1のフォントサイズを大きく */
     }
 
     footer {
@@ -65,11 +40,11 @@
       align-items: center;
       height: 60px;
       padding-right: 20px;
+      /* 右側に少し余白 */
     }
 
     main {
-      margin-top: 8rem;
-      /* Adjusted for the header and button container */
+      margin: 6rem 0;
       padding: 1rem;
     }
   </style>
@@ -77,18 +52,16 @@
 
 <body>
   <header>
-    <h1>書類作成補助システム</h1>
+    <h1>農業経営システム</h1>
   </header>
-
-  <div class="button-container">
-    <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
-    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
-  </div>
-
   <main>
-    <!-- メインコンテンツ -->
+    <form action="#" method="post">
+      <h1>管理者ログイン</h1>
+      <p>ログインID:<br><input type="text" name="text" /></p>
+      <p>パスワード:<br><input type="email" name="email" /></p>
+      <p><input type="submit" value="送信する"></p>
+    </form>
   </main>
-
   <footer>
     <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.html'">管理者ログイン</button>
   </footer>
@@ -98,7 +71,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     document.querySelector('header h1').addEventListener('click', function () {
-      window.location.href = 'sd5_home.html';
+      window.location.href = 'sd5_1.html';
     });
   </script>
 </body>
