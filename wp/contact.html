@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>農業経営システム</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    header,
+    footer {
+      background-color: brown;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      /* h1のフォントサイズを大きく */
+    }
+
+    footer {
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      height: 60px;
+      padding-right: 20px;
+      /* 右側に少し余白 */
+    }
+
+    main {
+      margin: 6rem 0;
+      padding: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>農業経営システム</h1>
+  </header>
+  <main>
+    <form action="#" method="post">
+      <h1>問合せフォーム</h1>
+      <p>お名前:<br><input type="text" name="text" /></p>
+      <p>メールアドレス:<br><input type="email" name="email" /></p>
+      <p>お問い合わせ内容:</p>
+      <textarea name="content" cols="30" rows="5">
+      お問い合わせ内容簡単に教えてください。
+      </textarea>
+      <p><input type="submit" value="送信する"></p>
+    </form>
+  </main>
+  <footer>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_3.php'">管理者ログイン</button>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    document.querySelector('header h1').addEventListener('click', function () {
+      window.location.href = 'sd5_1.html';
+    });
+  </script>
+</body>
+
+</html>
