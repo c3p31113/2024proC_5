@@ -1,8 +1,14 @@
-from fastapi import FastAPI, status
+from logging import getLogger
+from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 import uvicorn
 
-app = FastAPI()
+# from starlette.requests import Request
+# from starlette.responses import Response
+
+PORT = 3000
+RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
+LOGLEVEL = "info"  # "debug", "info", "warning", "error", "critical"
 
 """===作業方法===
 1.環境構築
@@ -14,6 +20,8 @@ app = FastAPI()
 必要なパッケージを導入する↓
 作業ディレクトリを2024proc_5にし、このコマンドを実行↓
 pip install -r requirements.txt
+もしかしたらこっちかも
+python -m pip install -r requirements.txt
 
 2.実際に動かす
 普通にこのapp.pyファイルをターミナルでpythonで実行すればそれだけでAPIサーバーとして起動する
@@ -24,19 +32,27 @@ URLの末尾にパスを追加する http://127.0.0.1:3000/v1/
 
 3.編集する
 @app.get("/") または @app.post("/") などを書いて、次の行に非同期関数を定義する
-この際にget()かpost()かでRESTのメソッドが何かをしている
+この際にget()かpost()かでRESTのメソッドが何かを指定している
 get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
 
 この関数でオブジェクトを返り値にすると、それがwebAPIのJSON形式での返り値になる
 @app.get("/test")
-async def hoge():
+def hoge():
     return {"hoge": "hoga"}
 
 http://127.0.0.1:3000/test/
 
+諸々の利便性から、返り値はdictやlistではなく、JSONResponseを用いるのもあり (優先度は低め、やらなくてもいい)
+HTTPのステータスコードを設定できる
+
+@app.get("/test")
+def hoge() -> JSONResponse:
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"hoge": "hoga"})
+http://127.0.0.1:3000/test/
+
 クエリパラメータは関数の引数で定義する
 @app.get("/test")
-async def hoge(number: int = 0):
+def hoge(number: int = 0):
     return {"hoge": number + 1}
 
 http://127.0.0.1:3000/test/?number=2
@@ -44,31 +60,64 @@ http://127.0.0.1:3000/test/?number=2
 編集を反映するにはfastAPIのプロセスを再起動する必要がある
 """
 
+logger = getLogger("uvicorn.app")
+app = FastAPI()
+print = logger.info  # ポインタって素晴らしい
+
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=3000, log_level="debug")
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=PORT,
+        log_level=LOGLEVEL.lower(),
+        reload=RELOAD,
+        log_config="config/log_config.yaml",
+    )
     # ここhostは0.0.0.0じゃないといけないらしい
 
 
 @app.get("/")
-async def get():
-    return {"message": "hello world! access v1 directory"}
+def root() -> JSONResponse:
+    logger.info("log test!")
+    return JSONResponse(content={"message": "hello world! access v1 directory"})
 
 
 @app.get("/v1/")
-async def get():
-    return {"message": "this is v1 directory"}
+def v1() -> JSONResponse:
+    return JSONResponse(content={"message": "this is v1 directory"})
 
 
-@app.get("/v1/statusTest/")
-async def get(number: int = 0):
-    print(number)
+@app.get("/v1/test/")
+def v1_test() -> JSONResponse:
+    return JSONResponse(content={})
+
+
+@app.get("/v1/test/statusTest/")
+def v1_statustest(request: Request, number: int = 0) -> JSONResponse:
+    if request.client is None:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "somehow you are non existant client"},
+        )
+    client_host = request.client.host
+    print(f"{client_host} {number}")
     if number == 0:
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "ok!"})
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": f"ok! selected number was {number}"},
+        )
     else:
         return JSONResponse(
-            status_code=status.HTTP_418_IM_A_TEAPOT, content={"message": "I'm tea pot!"}
+            status_code=status.HTTP_418_IM_A_TEAPOT,
+            content={"message": "I'm tea pot! selected number was {number}"},
         )
+
+
+@app.get("/v1/test/items/{number}")
+def v1_itemstest(request: Request, number: int = 0) -> JSONResponse:
+    print(number)
+    return JSONResponse(content={})
 
 
 if __name__ == "__main__":

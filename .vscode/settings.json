@@ -11,6 +11,7 @@
     },
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
+    "python.analysis.typeCheckingMode": "basic",
     "[html]": {
         "editor.tabSize": 2,
         "editor.suggest.insertMode": "replace"
