@@ -3,9 +3,6 @@ from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 import uvicorn
 
-# from starlette.requests import Request
-# from starlette.responses import Response
-
 PORT = 3000
 RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
 LOGLEVEL = "info"  # "debug", "info", "warning", "error", "critical"
@@ -42,12 +39,12 @@ def hoge():
 
 http://127.0.0.1:3000/test/
 
-諸々の利便性から、返り値はdictやlistではなく、JSONResponseを用いるのもあり (優先度は低め、やらなくてもいい)
+諸々の利便性から、返り値はdictやlistではなく、JSONResponseを用いると良い (優先度は低めなのでやらなくてもいい)
 HTTPのステータスコードを設定できる
-
 @app.get("/test")
 def hoge() -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_200_OK, content={"hoge": "hoga"})
+
 http://127.0.0.1:3000/test/
 
 クエリパラメータは関数の引数で定義する
@@ -58,6 +55,7 @@ def hoge(number: int = 0):
 http://127.0.0.1:3000/test/?number=2
 
 編集を反映するにはfastAPIのプロセスを再起動する必要がある
+RELOAD が True の場合は不要
 """
 
 logger = getLogger("uvicorn.app")
@@ -74,50 +72,62 @@ def main():
         reload=RELOAD,
         log_config="config/log_config.yaml",
     )
-    # ここhostは0.0.0.0じゃないといけないらしい
 
 
+# http://127.0.0.1:3000/
 @app.get("/")
 def root() -> JSONResponse:
     logger.info("log test!")
-    return JSONResponse(content={"message": "hello world! access v1 directory"})
+    return JSONResponse({"message": "hello world! access v1 directory"})
 
 
+# http://127.0.0.1:3000/v1/
 @app.get("/v1/")
 def v1() -> JSONResponse:
-    return JSONResponse(content={"message": "this is v1 directory"})
+    return JSONResponse({"message": "this is v1 directory"})
 
 
+# http://127.0.0.1:3000//v1/test/
 @app.get("/v1/test/")
 def v1_test() -> JSONResponse:
-    return JSONResponse(content={})
+    return JSONResponse({})
 
 
+# http://127.0.0.1:3000//v1/test/statusTest/
+# http://127.0.0.1:3000//v1/test/statusTest?number=0
+# http://127.0.0.1:3000//v1/test/statusTest?number=1
+#
+# クエリパラメータは関数の引数として宣言する
 @app.get("/v1/test/statusTest/")
-def v1_statustest(request: Request, number: int = 0) -> JSONResponse:
+def v1_test_statustest(request: Request, number: int = 0) -> JSONResponse:
     if request.client is None:
         return JSONResponse(
+            {"message": "somehow you are non existant client"},
             status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": "somehow you are non existant client"},
         )
     client_host = request.client.host
     print(f"{client_host} {number}")
     if number == 0:
         return JSONResponse(
+            {"message": "ok!", "number": number},
             status_code=status.HTTP_200_OK,
-            content={"message": f"ok! selected number was {number}"},
         )
     else:
         return JSONResponse(
+            {"message": "I'm tea pot!", "number": number},
             status_code=status.HTTP_418_IM_A_TEAPOT,
-            content={"message": "I'm tea pot! selected number was {number}"},
         )
 
 
-@app.get("/v1/test/items/{number}")
-def v1_itemstest(request: Request, number: int = 0) -> JSONResponse:
-    print(number)
-    return JSONResponse(content={})
+# http://127.0.0.1:3000/v1/test/items_
+# http://127.0.0.1:3000/v1/test/items_1
+# http://127.0.0.1:3000/v1/test/items_5
+#
+# 動的URL
+@app.get("/v1/test/items_{number}")
+def v1_test_items(request: Request, number: int = 0) -> JSONResponse:
+    print(f"selected number was {number}")
+    return JSONResponse({"message": "request ok!", "number": number})
 
 
 if __name__ == "__main__":
