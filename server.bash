@@ -25,6 +25,7 @@ function main() {
         SendKey $sessionname:fastapi "python3.12 $fastapifilePath"
         KillWindow $sessionname dummy
         echo "session $sessionname initialized!"
+        sayIP
         ;;
     stop)
         if ! IsSessionAlive $sessionname; then
@@ -78,6 +79,7 @@ function main() {
         fi
         if [ $error -eq 0 ]; then
             echo "all ok"
+            sayIP
         else
             exit 1
         fi
@@ -88,6 +90,12 @@ function main() {
         ;;
     esac
     exit 0
+}
+function sayIP() {
+    globalip=$(curl "inet-ip.info" 2>/dev/null)
+    localip=$(ifconfig | grep -e "inet " | grep -v "127.0.0.1" | awk '{print $2}')
+    echo "global ip is $globalip"
+    echo "local ip is $localip"
 }
 function IsSessionAlive() {
     local sessionname=$1
