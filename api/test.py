@@ -28,9 +28,9 @@ INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
 URLの末尾にパスを追加する http://127.0.0.1:3000/v1/
 
 3.編集する
-@app.get("/") または @app.post("/") などを書いて、次の行に非同期関数を定義する
-この際にget()かpost()かでRESTのメソッドが何かを指定している
-get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
+@app.get("/") または @app.post("/") などを書いて、次の行に関数を定義する
+この際に@app.get()か@app.post()かでRESTのメソッドが何かを指定している
+@app.get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
 
 この関数でオブジェクトを返り値にすると、それがwebAPIのJSON形式での返り値になる
 @app.get("/test")
@@ -65,7 +65,7 @@ print = logger.info  # ポインタって素晴らしい
 
 def main():
     uvicorn.run(
-        "main:app",
+        "test:app",
         host="0.0.0.0",
         port=PORT,
         log_level=LOGLEVEL.lower(),
