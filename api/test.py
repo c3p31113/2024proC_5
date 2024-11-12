@@ -1,5 +1,6 @@
 from logging import getLogger
 from fastapi import FastAPI, status, Request
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import uvicorn
 
@@ -117,6 +118,40 @@ def v1_test_statustest(request: Request, number: int = 0) -> JSONResponse:
             {"message": "I'm tea pot!", "number": number},
             status_code=status.HTTP_418_IM_A_TEAPOT,
         )
+
+
+class Coffee(BaseModel):
+    id: int
+    taste: str
+    amount: float
+
+
+@app.post("/v1/test/posttest/")
+def v1_test_posttest(request: Request, coffee: Coffee) -> JSONResponse:
+    return JSONResponse(
+        {
+            "message": "ok!",
+            "sent_query": {
+                "id": coffee.id,
+                "taste": coffee.taste,
+                "amount": coffee.amount,
+            },
+        }
+    )
+
+
+@app.post("/v1/test/posttests/")
+def v1_test_posttests(request: Request, coffees: list[Coffee]) -> JSONResponse:
+    sentquery: list[dict] = []
+    for coffee in coffees:
+        sentquery.append(
+            {
+                "id": coffee.id,
+                "taste": coffee.taste,
+                "amount": coffee.amount,
+            }
+        )
+    return JSONResponse({"message": "ok!", "sent_query": sentquery})
 
 
 # http://127.0.0.1:3000/v1/test/items_
