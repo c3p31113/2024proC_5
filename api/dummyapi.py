@@ -12,7 +12,7 @@ logger = getLogger("uvicorn.app")
 app = FastAPI()
 print = logger.info  # ポインタって素晴らしい
 
-products = [
+products = [  # TODO mariadbデータベースに接続
     {
         "id": 1,
         "name": "あんぽ柿",
@@ -69,6 +69,12 @@ products = [
     },
 ]
 
+productCategories = [
+    {"id": 1, "name": "果樹類", "summary": None},
+    {"id": 2, "name": "野菜類", "summary": None},
+    {"id": 3, "name": "きのこ類", "summary": None},
+]
+
 
 def main():
     uvicorn.run(
@@ -81,6 +87,7 @@ def main():
     )
 
 
+# TODO 出力したければoutputメソッドを呼ばないといけないことを考えると逆に面倒かもしれない
 class Response(object):
     valid: bool
     message: str
@@ -117,7 +124,7 @@ def v1(request: Request) -> JSONResponse:
 
 
 @app.get("/v1/products")
-def getAllProducts(request: Request) -> JSONResponse:
+def getProducts(request: Request) -> JSONResponse:
     return JSONResponse(
         Response("this is dummy data and can be outdated", products).output(),
         media_type="charset=utf-8",
@@ -154,6 +161,47 @@ def getProduct(request: Request, id: int | None = None):
         media_type="charset=utf-8",
     )
 
+
+@app.get("/v1/productCategories")
+def getProductCategories(request: Request):
+    return JSONResponse(
+        Response("this is dummy data and can be outdated", productCategories).output(),
+        media_type="charset=utf-8",
+    )
+
+
+@app.get("/v1/productCategory")
+def getProductCategory(request: Request, id: int | None = None):
+    if request.client is None:
+        return JSONResponse(
+            Response("somehow you are non existant client", valid=False).output(),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            media_type="charset=utf-8",
+        )
+    logger.info(f"{request.client.host} has accessed to product specifying {id}")
+    if id is None:
+        return JSONResponse(
+            Response("error. specify ID", valid=False).output(),
+            status_code=status.HTTP_400_BAD_REQUEST,
+            media_type="charset=utf-8",
+        )
+    for productCategory in productCategories:
+        if productCategory["id"] == id:
+            return JSONResponse(
+                Response(
+                    "query ok. this is dummy data and can be outdated", productCategory
+                ).output(),
+                media_type="charset=utf-8",
+            )
+    return JSONResponse(
+        Response(
+            "specified product id wasn't found in the table", None, False
+        ).output(),
+        media_type="charset=utf-8",
+    )
+
+
+# TODO formのダミーPOST
 
 if __name__ == "__main__":
     main()
