@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 }
 
 // フォームが送信されたとき
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") { //TODO webAPIはfastAPIで処理するので、phpでは書かない
   // フォームデータを取得
   $crop1 = $_POST['crop1'];
   $area1 = $_POST['area1'];
@@ -73,6 +73,9 @@ $conn->close();
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    /* FIXME ほぼ同じ内容のcssが全ファイルに別々に書かれてる
+    同じ内容を複数別の箇所に書いてると問題の温床なので、一つのファイルにまとめてそれを呼び出して欲しい
+    */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -249,6 +252,8 @@ $conn->close();
       </div>
       <div class="record-container">
         <select name="crop1">
+          <!-- FIXME 同じ内容を複数回書いてると問題の温床なので直した方がいい
+          このoption群を出力するphp関数を定義してそれを毎回呼び出す方がいいと思う -->
           <option value="---">---</option>
           <option value="あんぽ柿">あんぽ柿</option>
           <option value="いちご">いちご</option>
