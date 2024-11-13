@@ -6,174 +6,155 @@
 -- 生成日時: 2024-11-02 12:18:16
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */
+;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */
+;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */
+;
+/*!40101 SET NAMES utf8mb4 */
+;
 --
 -- データベース: `probc2024-sd5`
 --
 
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `フォーム`
+-- テーブルの構造 `form`
 --
 
-CREATE TABLE `フォーム` (
+CREATE TABLE `form` (
   `ID` int(11) NOT NULL,
-  `作物リスト` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`作物リスト`)),
-  `人数` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `product_array` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`product_array`)),
+  `manpower` int(50) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `作物`
+-- テーブルの構造 `products`
 --
 
-CREATE TABLE `作物` (
+CREATE TABLE `products` (
   `ID` int(11) NOT NULL,
-  `名前` text NOT NULL,
-  `概要` text DEFAULT NULL,
-  `詳細説明` text DEFAULT NULL,
-  `作物カテゴリID` int(50) NOT NULL,
-  `1a当たりの収穫量` int(50) NOT NULL,
-  `1kg当たりの価格` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `name` text NOT NULL,
+  `summary` text DEFAULT NULL,
+  `desc` text DEFAULT NULL,
+  `product_categories_ID` int(50) NOT NULL,
+  `kg_per_1a` int(50) NOT NULL,
+  `yen_per_1a` int(50) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `作物カテゴリ`
+-- テーブルの構造 `product_categories`
 --
 
-CREATE TABLE `作物カテゴリ` (
+CREATE TABLE `product_categories` (
   `ID` int(11) NOT NULL,
-  `カテゴリ名` text NOT NULL,
-  `概要` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `name` text NOT NULL,
+  `summary` text DEFAULT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `問い合わせフォーム`
+-- テーブルの構造 `contacts`
 --
 
-CREATE TABLE `問い合わせフォーム` (
+CREATE TABLE `contacts` (
   `ID` int(11) NOT NULL,
-  `メールアドレス` text NOT NULL,
-  `フォーム内容` int(11) DEFAULT NULL,
-  `タイトル` text NOT NULL,
-  `内容` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `email_adrress` text NOT NULL,
+  `form_id` int(11) DEFAULT NULL,
+  `title` text NOT NULL,
+  `content` text NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `管理者アカウント`
+-- テーブルの構造 `admins`
 --
 
-CREATE TABLE `管理者アカウント` (
+CREATE TABLE `admins` (
   `ID` int(11) NOT NULL,
-  `ユーザー名` text NOT NULL,
-  `パスワード` text NOT NULL,
-  `最終ログイン日時` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `name` text NOT NULL,
+  `password` text NOT NULL,
+  `last_login_date` datetime DEFAULT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 --
 -- ダンプしたテーブルのインデックス
 --
 
 --
--- テーブルのインデックス `フォーム`
+-- テーブルのインデックス `form`
 --
-ALTER TABLE `フォーム`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `form`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `作物`
+-- テーブルのインデックス `products`
 --
-ALTER TABLE `作物`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `products`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `作物カテゴリ`
+-- テーブルのインデックス `product_categories`
 --
-ALTER TABLE `作物カテゴリ`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `product_categories`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `問い合わせフォーム`
+-- テーブルのインデックス `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  ADD PRIMARY KEY (`ID`),
-  ADD KEY `フォーム内容` (`フォーム内容`);
-
+ALTER TABLE `contacts`
+ADD PRIMARY KEY (`ID`),
+  ADD KEY `form_id` (`form_id`);
 --
--- テーブルのインデックス `管理者アカウント`
+-- テーブルのインデックス `admins`
 --
-ALTER TABLE `管理者アカウント`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `admins`
+ADD PRIMARY KEY (`ID`);
 --
 -- ダンプしたテーブルの AUTO_INCREMENT
 --
 
 --
--- テーブルの AUTO_INCREMENT `フォーム`
+-- テーブルの AUTO_INCREMENT `form`
 --
-ALTER TABLE `フォーム`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `form`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `作物`
+-- テーブルの AUTO_INCREMENT `products`
 --
-ALTER TABLE `作物`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `products`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `作物カテゴリ`
+-- テーブルの AUTO_INCREMENT `product_categories`
 --
-ALTER TABLE `作物カテゴリ`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `product_categories`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `問い合わせフォーム`
+-- テーブルの AUTO_INCREMENT `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `contacts`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `管理者アカウント`
+-- テーブルの AUTO_INCREMENT `admins`
 --
-ALTER TABLE `管理者アカウント`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `admins`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- ダンプしたテーブルの制約
 --
 
 --
--- テーブルの制約 `作物`
+-- テーブルの制約 `products`
 --
-ALTER TABLE `作物`
-  ADD CONSTRAINT `作物_ibfk_1` FOREIGN KEY (`作物カテゴリID`) REFERENCES `作物カテゴリ` (`ID`);
-
+ALTER TABLE `products`
+ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`product_categories_ID`) REFERENCES `product_categories` (`ID`);
 --
--- テーブルの制約 `問い合わせフォーム`
+-- テーブルの制約 `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  ADD CONSTRAINT `問い合わせフォーム_ibfk_1` FOREIGN KEY (`フォーム内容`) REFERENCES `フォーム` (`ID`);
+ALTER TABLE `contacts`
+ADD CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `form` (`ID`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
+;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */
+;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */
+;

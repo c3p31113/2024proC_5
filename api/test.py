@@ -1,5 +1,6 @@
 from logging import getLogger
 from fastapi import FastAPI, status, Request
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import uvicorn
 
@@ -28,9 +29,9 @@ INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
 URLの末尾にパスを追加する http://127.0.0.1:3000/v1/
 
 3.編集する
-@app.get("/") または @app.post("/") などを書いて、次の行に非同期関数を定義する
-この際にget()かpost()かでRESTのメソッドが何かを指定している
-get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
+@app.get("/") または @app.post("/") などを書いて、次の行に関数を定義する
+この際に@app.get()か@app.post()かでRESTのメソッドが何かを指定している
+@app.get()ならばこのパスにGETメソッドでAPIリクエストをした際の処理を記述することになる
 
 この関数でオブジェクトを返り値にすると、それがwebAPIのJSON形式での返り値になる
 @app.get("/test")
@@ -65,7 +66,7 @@ print = logger.info  # ポインタって素晴らしい
 
 def main():
     uvicorn.run(
-        "main:app",
+        "test:app",
         host="0.0.0.0",
         port=PORT,
         log_level=LOGLEVEL.lower(),
@@ -117,6 +118,40 @@ def v1_test_statustest(request: Request, number: int = 0) -> JSONResponse:
             {"message": "I'm tea pot!", "number": number},
             status_code=status.HTTP_418_IM_A_TEAPOT,
         )
+
+
+class Coffee(BaseModel):
+    id: int
+    taste: str
+    amount: float
+
+
+@app.post("/v1/test/posttest/")
+def v1_test_posttest(request: Request, coffee: Coffee) -> JSONResponse:
+    return JSONResponse(
+        {
+            "message": "ok!",
+            "sent_query": {
+                "id": coffee.id,
+                "taste": coffee.taste,
+                "amount": coffee.amount,
+            },
+        }
+    )
+
+
+@app.post("/v1/test/posttests/")
+def v1_test_posttests(request: Request, coffees: list[Coffee]) -> JSONResponse:
+    sentquery: list[dict] = []
+    for coffee in coffees:
+        sentquery.append(
+            {
+                "id": coffee.id,
+                "taste": coffee.taste,
+                "amount": coffee.amount,
+            }
+        )
+    return JSONResponse({"message": "ok!", "sent_query": sentquery})
 
 
 # http://127.0.0.1:3000/v1/test/items_
