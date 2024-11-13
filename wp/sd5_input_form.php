@@ -1,9 +1,10 @@
 <?php
 // データベース接続設定
-$servername = "localhost"; // ホスト名
-$username = "probc"; // ユーザー名
-$password = "probc"; // パスワード
-$dbname = "probc_sd5"; // データベース名
+$dbconfig = json_decode(file_get_contents("../config/dbconfig.json"), true);
+$servername = $dbconfig["host"]; // ホスト名
+$username = $dbconfig["user"]; // ユーザー名
+$password = $dbconfig["password"]; // パスワード
+$dbname = $dbconfig["database"]; // データベース名
 
 // データベース接続
 $conn = new mysqli($servername, $username, $password, $dbname);
