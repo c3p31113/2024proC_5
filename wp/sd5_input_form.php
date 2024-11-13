@@ -1,10 +1,9 @@
 <?php
 // データベース接続設定
-$dbconfig = json_decode(file_get_contents("../config/dbconfig.json"), true);
-$servername = $dbconfig["host"]; // ホスト名
-$username = $dbconfig["user"]; // ユーザー名
-$password = $dbconfig["password"]; // パスワード
-$dbname = $dbconfig["database"]; // データベース名
+$servername = "localhost"; // ホスト名
+$username = "probc"; // ユーザー名
+$password = "probc"; // パスワード
+$dbname = "probc_sd5"; // データベース名
 
 // データベース接続
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -15,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // フォームが送信されたとき
-if ($_SERVER["REQUEST_METHOD"] == "POST") { //TODO webAPIはfastAPIで処理するので、phpでは書かない
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // フォームデータを取得
   $crop1 = $_POST['crop1'];
   $area1 = $_POST['area1'];
@@ -62,6 +61,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") { //TODO webAPIはfastAPIで処理す�
 
 // 接続を閉じる
 $conn->close();
+
+// 作物のオプションを出力する関数
+function renderCropOptions() {
+  $crops = [
+    "---", "あんぽ柿", "いちご", "いんげん", "きゅうり", "さくらんぼ",
+    "さやえんどう", "しいたけ", "春菊", "西洋なし", "ニラ", "花わさび",
+    "ピーマン", "ぶどう", "桃", "りんご"
+  ];
+
+  foreach ($crops as $crop) {
+    echo "<option value=\"$crop\">$crop</option>";
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -72,168 +84,7 @@ $conn->close();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    /* FIXME ほぼ同じ内容のcssが全ファイルに別々に書かれてる
-    同じ内容を複数別の箇所に書いてると問題の温床なので、一つのファイルにまとめてそれを呼び出して欲しい
-    */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    header,
-    footer {
-      background-color: #ae5123;
-      color: white;
-      text-align: center;
-      padding: 1.5rem;
-    }
-
-    header {
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 1000;
-    }
-
-    header h1 {
-      font-size: 2rem;
-      cursor: pointer;
-    }
-
-    .button-container {
-      display: flex;
-      background-color: #8b4513;
-      color: white;
-      width: 100%;
-      position: fixed;
-      top: 5rem;
-      z-index: 900;
-    }
-
-    .button-box {
-      flex: 1;
-      text-align: center;
-      padding: 1.5rem 0;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1.5rem;
-    }
-
-    .button-box:hover {
-      background-color: chocolate;
-    }
-
-    .content-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10rem;
-      padding: 1.5rem;
-    }
-
-    .record-container {
-      width: 100%;
-      max-width: 800px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: nowrap;
-    }
-
-    .record-container label {
-      margin-right: 0.5rem;
-      width: 20%;
-      text-align: center;
-      font-size: 1.2rem;
-      white-space: nowrap;
-    }
-
-    .record-container select,
-    .record-container input {
-      flex: 1;
-      padding: 0.5rem;
-      margin-right: 0.5rem;
-    }
-
-    .unit {
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .decide-button {
-      position: fixed;
-      bottom: 90px;
-      right: 30px;
-    }
-
-    .decide-button button {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: white;
-      background-color: #ae5123;
-      border: none;
-      padding: 0.75rem 2rem;
-      border-radius: 5px;
-    }
-
-    .decide-button button:hover {
-      background-color: #8b4513;
-    }
-
-    .main-labels {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 800px;
-      font-size: 1.5rem;
-    }
-
-    footer {
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      height: 60px;
-      padding-right: 20px;
-    }
-
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.5rem;
-      }
-
-      .button-box {
-        font-size: 1.2rem;
-        padding: 1rem 0;
-      }
-
-      .record-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .record-container label,
-      .record-container select,
-      .record-container input {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-
-      .decide-button button {
-        font-size: 1.2rem;
-        padding: 0.5rem 1.5rem;
-      }
-
-      footer {
-        padding-right: 10px;
-        height: 50px;
-      }
-    }
-  </style>
+  <link href="styles.css" rel="stylesheet">
 </head>
 
 <body>
@@ -252,112 +103,35 @@ $conn->close();
       </div>
       <div class="record-container">
         <select name="crop1">
-          <!-- FIXME 同じ内容を複数回書いてると問題の温床なので直した方がいい
-          このoption群を出力するphp関数を定義してそれを毎回呼び出す方がいいと思う -->
-          <option value="---">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+          <?php renderCropOptions(); ?>
         </select>
         <input type="number" name="area1" placeholder="面積">
         <span class="unit">a(アール)</span>
       </div>
       <div class="record-container">
         <select name="crop2">
-          <option value="---">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+          <?php renderCropOptions(); ?>
         </select>
         <input type="number" name="area2" placeholder="面積">
         <span class="unit">a(アール)</span>
       </div>
       <div class="record-container">
         <select name="crop3">
-          <option value="---">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+          <?php renderCropOptions(); ?>
         </select>
         <input type="number" name="area3" placeholder="面積">
         <span class="unit">a(アール)</span>
       </div>
       <div class="record-container">
         <select name="crop4">
-          <option value="---">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+          <?php renderCropOptions(); ?>
         </select>
         <input type="number" name="area4" placeholder="面積">
         <span class="unit">a(アール)</span>
       </div>
       <div class="record-container">
         <select name="crop5">
-          <option value="---">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+          <?php renderCropOptions(); ?>
         </select>
         <input type="number" name="area5" placeholder="面積">
         <span class="unit">a(アール)</span>
