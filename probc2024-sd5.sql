@@ -6,174 +6,186 @@
 -- 生成日時: 2024-11-02 12:18:16
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */
+;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */
+;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */
+;
+/*!40101 SET NAMES utf8mb4 */
+;
 --
 -- データベース: `probc2024-sd5`
 --
 
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `フォーム`
+-- テーブルの構造 `form`
 --
 
-CREATE TABLE `フォーム` (
+CREATE TABLE `form` (
   `ID` int(11) NOT NULL,
-  `作物リスト` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`作物リスト`)),
-  `人数` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `product_array` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`product_array`)),
+  `manpower` int(50) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+-- --------------------------------------------------------
+--
+-- テーブルの構造 `products`
+--
+
+CREATE TABLE `products` (
+  `ID` int(11) NOT NULL,
+  `name` text NOT NULL,
+  `summary` text DEFAULT NULL,
+  `desc` text DEFAULT NULL,
+  `product_categories_ID` int(50) NOT NULL,
+  `kg_per_1a` int(50) NOT NULL,
+  `yen_per_1a` int(50) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+--
+-- テーブルのデータのダンプ `products`
+--
+
+INSERT INTO `products` (`ID`, `name`, `summary`, `desc`, `product_categories_ID`, `kg_per_1a`, `yen_per_1a`) VALUES
+(1, 'あんぽ柿', '品種は平核無柿、蜂屋柿など', NULL, 1, 78, 240),
+(2, 'いちご', '品種はとちおとめ、さちのか、など', NULL, 2, 218, 1190),
+(3, 'いんげん', '品種はいちず、鴨川グリーンなど', NULL, 2, 72, 8678),
+(4, 'きゅうり', '品種はアンコール10、パイロット2号、南極1号など', NULL, 2, 580, 233),
+(5, 'さくらんぼ', '品種は佐藤錦など', NULL, 1, 0, 0),
+(6, 'さやえんどう', '品種は姫みどり、ゆうさやなど', NULL, 2, 43, 1157),
+(7, 'しいたけ', NULL, NULL, 3, 0, 928),
+(8, '春菊', NULL, NULL, 2, 119, 516),
+(9, '西洋なし', '品種はラ・フランス、ル・レクチェ、ゼネラル・レクラークなど', NULL, 1, 157, 373),
+(10, 'ニラ', '品種はワンダーグリーン、パワフルグリーンベルトなど', NULL, 2, 168, 546),
+(11, '花わさび', NULL, NULL, 2, 0, 0),
+(12, 'ピーマン', NULL, NULL, 2, 346, 346),
+(13, 'ぶどう', '品種は巨峰、高尾など', NULL, 1, 94, 1062),
+(14, '桃', '品種はあかつき、川中島白桃、ゆうぞらなど', NULL, 1, 158, 695),
+(15, 'りんご', '品種は王林、ふじなど', NULL, 1, 159, 287);
 
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `作物`
+-- テーブルの構造 `product_categories`
 --
 
-CREATE TABLE `作物` (
+CREATE TABLE `product_categories` (
   `ID` int(11) NOT NULL,
-  `名前` text NOT NULL,
-  `概要` text DEFAULT NULL,
-  `詳細説明` text DEFAULT NULL,
-  `作物カテゴリID` int(50) NOT NULL,
-  `1a当たりの収穫量` int(50) NOT NULL,
-  `1kg当たりの価格` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `name` text NOT NULL,
+  `summary` text DEFAULT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
+--
+-- テーブルのデータのダンプ `product_categories`
+--
+
+INSERT INTO `product_categories` (`ID`, `name`, `summary`) VALUES
+(1, '果樹類', NULL),
+(2, '野菜類', NULL),
+(3, 'きのこ類', NULL);
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `作物カテゴリ`
+-- テーブルの構造 `contacts`
 --
 
-CREATE TABLE `作物カテゴリ` (
+CREATE TABLE `contacts` (
   `ID` int(11) NOT NULL,
-  `カテゴリ名` text NOT NULL,
-  `概要` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `email_adrress` text NOT NULL,
+  `form_id` int(11) DEFAULT NULL,
+  `title` text NOT NULL,
+  `content` text NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
-
 --
--- テーブルの構造 `問い合わせフォーム`
+-- テーブルの構造 `admins`
 --
 
-CREATE TABLE `問い合わせフォーム` (
+CREATE TABLE `admins` (
   `ID` int(11) NOT NULL,
-  `メールアドレス` text NOT NULL,
-  `フォーム内容` int(11) DEFAULT NULL,
-  `タイトル` text NOT NULL,
-  `内容` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- テーブルの構造 `管理者アカウント`
---
-
-CREATE TABLE `管理者アカウント` (
-  `ID` int(11) NOT NULL,
-  `ユーザー名` text NOT NULL,
-  `パスワード` text NOT NULL,
-  `最終ログイン日時` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+  `name` text NOT NULL,
+  `password` text NOT NULL,
+  `last_login_date` datetime DEFAULT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 --
 -- ダンプしたテーブルのインデックス
 --
 
 --
--- テーブルのインデックス `フォーム`
+-- テーブルのインデックス `form`
 --
-ALTER TABLE `フォーム`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `form`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `作物`
+-- テーブルのインデックス `products`
 --
-ALTER TABLE `作物`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `products`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `作物カテゴリ`
+-- テーブルのインデックス `product_categories`
 --
-ALTER TABLE `作物カテゴリ`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `product_categories`
+ADD PRIMARY KEY (`ID`);
 --
--- テーブルのインデックス `問い合わせフォーム`
+-- テーブルのインデックス `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  ADD PRIMARY KEY (`ID`),
-  ADD KEY `フォーム内容` (`フォーム内容`);
-
+ALTER TABLE `contacts`
+ADD PRIMARY KEY (`ID`),
+  ADD KEY `form_id` (`form_id`);
 --
--- テーブルのインデックス `管理者アカウント`
+-- テーブルのインデックス `admins`
 --
-ALTER TABLE `管理者アカウント`
-  ADD PRIMARY KEY (`ID`);
-
+ALTER TABLE `admins`
+ADD PRIMARY KEY (`ID`);
 --
 -- ダンプしたテーブルの AUTO_INCREMENT
 --
 
 --
--- テーブルの AUTO_INCREMENT `フォーム`
+-- テーブルの AUTO_INCREMENT `form`
 --
-ALTER TABLE `フォーム`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `form`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `作物`
+-- テーブルの AUTO_INCREMENT `products`
 --
-ALTER TABLE `作物`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `products`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `作物カテゴリ`
+-- テーブルの AUTO_INCREMENT `product_categories`
 --
-ALTER TABLE `作物カテゴリ`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `product_categories`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `問い合わせフォーム`
+-- テーブルの AUTO_INCREMENT `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `contacts`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
--- テーブルの AUTO_INCREMENT `管理者アカウント`
+-- テーブルの AUTO_INCREMENT `admins`
 --
-ALTER TABLE `管理者アカウント`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
+ALTER TABLE `admins`
+MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- ダンプしたテーブルの制約
 --
 
 --
--- テーブルの制約 `作物`
+-- テーブルの制約 `products`
 --
-ALTER TABLE `作物`
-  ADD CONSTRAINT `作物_ibfk_1` FOREIGN KEY (`作物カテゴリID`) REFERENCES `作物カテゴリ` (`ID`);
-
+ALTER TABLE `products`
+ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`product_categories_ID`) REFERENCES `product_categories` (`ID`);
 --
--- テーブルの制約 `問い合わせフォーム`
+-- テーブルの制約 `contacts`
 --
-ALTER TABLE `問い合わせフォーム`
-  ADD CONSTRAINT `問い合わせフォーム_ibfk_1` FOREIGN KEY (`フォーム内容`) REFERENCES `フォーム` (`ID`);
+ALTER TABLE `contacts`
+ADD CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `form` (`ID`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
+;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */
+;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */
+;
