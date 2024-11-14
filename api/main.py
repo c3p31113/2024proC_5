@@ -48,12 +48,34 @@ class APIResponse(object):
         return {"valid": self.valid, "message": self.message, "body": self.body}
 
 
-RESPONSE_FAILED_TO_CONNECT_DB = APIResponse(
-    "couldn't connect to database", body=None, valid=False
-).output()
-RESPONSE_BLANK_CLIENT_IP = APIResponse(
-    "somehow you are non-existance client. couldn't get your IP", body=None, valid=False
-).output()
+RESPONSE_FAILED_TO_CONNECT_DB = JSONResponse(
+    content=APIResponse(
+        "couldn't connect to database", body=None, valid=False
+    ).output(),
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    media_type="charset=utf-8",
+)
+RESPONSE_BLANK_CLIENT_IP = JSONResponse(
+    content=APIResponse(
+        "somehow you are non-existance client. couldn't get your IP",
+        body=None,
+        valid=False,
+    ).output(),
+    status_code=status.HTTP_400_BAD_REQUEST,
+    media_type="charset=utf-8",
+)
+RESPONSE_NO_MATCH_IN_DB = JSONResponse(
+    content=APIResponse(
+        "specified product id wasn't found in the table", None, False
+    ).output(),
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    media_type="charset=utf-8",
+)
+RESPONSE_BLANK_QUERY = JSONResponse(
+    content=APIResponse("query was blank.", None, False).output(),
+    status_code=status.HTTP_400_BAD_REQUEST,
+    media_type="charset=utf-8",
+)
 
 
 def jsonload(filepath: str):
@@ -73,7 +95,7 @@ def connect(configpath="./config/dbconfig.json"):
     )
 
 
-def selectfrom(
+def selectallfrom(
     connection: MySQLConnection,
     columns: str | list[str],
     table: str,
@@ -91,7 +113,7 @@ def selectfrom(
     try:
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
-        print("the table doesn't exist!")
+        logger.error(f"query failed to run: {query}")
         return
     result = cursor.fetchall()
     cursor.close()
@@ -101,29 +123,27 @@ def selectfrom(
 @app.get("/")
 def root(request: Request) -> JSONResponse:
     if request.client is None:
-        return JSONResponse(
-            RESPONSE_BLANK_CLIENT_IP,
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return RESPONSE_BLANK_CLIENT_IP
     logger.info(f"{request.client.host} has accessed to root")
-    return JSONResponse(APIResponse("this is dummy API").output())
+    return JSONResponse(
+        APIResponse("this is 2024proc sd5 API. check /docs page for documents").output()
+    )
 
 
 @app.get("/v1/")
 def v1(request: Request) -> JSONResponse:
-    return JSONResponse(APIResponse("this is dummy API, v1").output())
+    return JSONResponse(APIResponse("this is 2024proc sd5 API, version 1").output())
 
 
 @app.get("/v1/products")
 def getProducts(request: Request) -> JSONResponse:
+    if request.client is None:
+        return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectfrom(connection, "*", "products")
+    products = selectallfrom(connection, "*", "products")
     connection.close()
     if products is None:
-        return JSONResponse(
-            RESPONSE_FAILED_TO_CONNECT_DB,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", products).output(),
         media_type="charset=utf-8",
@@ -131,62 +151,44 @@ def getProducts(request: Request) -> JSONResponse:
 
 
 @app.get("/v1/product")
-def getProduct(request: Request, id: int | None = None):
+def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if request.client is None:
-        return JSONResponse(
-            RESPONSE_BLANK_CLIENT_IP,
-            status_code=status.HTTP_400_BAD_REQUEST,
-            media_type="charset=utf-8",
-        )
+        return RESPONSE_BLANK_CLIENT_IP
     logger.info(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
-        return JSONResponse(
-            APIResponse("error. specify ID", valid=False).output(),
-            status_code=status.HTTP_400_BAD_REQUEST,
-            media_type="charset=utf-8",
-        )
+        return RESPONSE_BLANK_QUERY
     connection = connect()
-    product_raw = selectfrom(
+    product_raw = selectallfrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
     )
     if product_raw is None:
-        return JSONResponse(
-            RESPONSE_FAILED_TO_CONNECT_DB,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return RESPONSE_FAILED_TO_CONNECT_DB
+    if product_raw == []:
+        return RESPONSE_NO_MATCH_IN_DB
     product = product_raw[0]
     connection.close()
     logger.info(product)
     if product is None:
-        return JSONResponse(
-            RESPONSE_FAILED_TO_CONNECT_DB,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return RESPONSE_FAILED_TO_CONNECT_DB
     if product["ID"] == id:
         return JSONResponse(
-            APIResponse("query ok", product).output(),
+            APIResponse("ok", product).output(),
             media_type="charset=utf-8",
         )
-    return JSONResponse(
-        APIResponse(
-            "specified product id wasn't found in the table", None, False
-        ).output(),
-        media_type="charset=utf-8",
-    )
+    return RESPONSE_NO_MATCH_IN_DB
 
 
 @app.get("/v1/productCategories")
-def getProductCategories(request: Request):
+def getProductCategories(request: Request) -> JSONResponse:
+    if request.client is None:
+        return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    productCategories = selectfrom(
+    productCategories = selectallfrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES
     )
     connection.close()
     if productCategories is None:
-        return JSONResponse(
-            APIResponse("couldn't connect to database", valid=False).output(),
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", productCategories).output(),
         media_type="charset=utf-8",
@@ -194,45 +196,29 @@ def getProductCategories(request: Request):
 
 
 @app.get("/v1/productCategory")
-def getProductCategory(request: Request, id: int | None = None):
+def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if request.client is None:
-        return JSONResponse(
-            APIResponse("somehow you are non existant client", valid=False).output(),
-            status_code=status.HTTP_400_BAD_REQUEST,
-            media_type="charset=utf-8",
-        )
+        return RESPONSE_BLANK_CLIENT_IP
     logger.info(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
-        return JSONResponse(
-            APIResponse("error. specify ID", valid=False).output(),
-            status_code=status.HTTP_400_BAD_REQUEST,
-            media_type="charset=utf-8",
-        )
+        return RESPONSE_BLANK_QUERY
     connection = connect()
-    productCategory_raw = selectfrom(
+    productCategory_raw = selectallfrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES, f"ID = {id}"
     )
     if productCategory_raw is None:
-        return JSONResponse(
-            APIResponse("couldn't connect to database", valid=False).output(),
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return RESPONSE_FAILED_TO_CONNECT_DB
+    elif productCategory_raw == []:
+        return RESPONSE_NO_MATCH_IN_DB
     productCategory = productCategory_raw[0]
     connection.close()
     logger.info(productCategory)
-    if productCategory["id"] == id:
+    if productCategory["ID"] == id:
         return JSONResponse(
-            APIResponse(
-                "query ok. this is dummy data and can be outdated", productCategory
-            ).output(),
+            APIResponse("ok", productCategory).output(),
             media_type="charset=utf-8",
         )
-    return JSONResponse(
-        APIResponse(
-            "specified product id wasn't found in the table", None, False
-        ).output(),
-        media_type="charset=utf-8",
-    )
+    return RESPONSE_NO_MATCH_IN_DB
 
 
 if __name__ == "__main__":
