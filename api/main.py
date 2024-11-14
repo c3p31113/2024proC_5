@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
 from mysql.connector import MySQLConnection, errors as MYSQLerrors
+from mysql.connector.cursor import MySQLCursor
 import literals
 
 PORT = 3000
@@ -95,12 +96,9 @@ def connect(configpath="./config/dbconfig.json"):
     )
 
 
-def selectallfrom(
-    connection: MySQLConnection,
-    columns: str | list[str],
-    table: str,
-    where: str = "",
-) -> list[dict[str, Any] | Any] | None:
+def selectFrom(
+    connection: MySQLConnection, columns: str | list[str], table: str, where: str = ""
+) -> MySQLCursor:
     cursor = connection.cursor(dictionary=True)
     if columns is str:
         query_columns = columns
@@ -114,8 +112,29 @@ def selectallfrom(
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
         logger.error(f"query failed to run: {query}")
-        return
+    return cursor
+
+
+def selectAllFrom(
+    connection: MySQLConnection,
+    columns: str | list[str],
+    table: str,
+    where: str = "",
+) -> list[dict[str, Any] | Any] | None:
+    cursor = selectFrom(connection, columns, table, where)
     result = cursor.fetchall()
+    cursor.close()
+    return result
+
+
+def selectOneFrom(
+    connection: MySQLConnection,
+    columns: str | list[str],
+    table: str,
+    where: str = "",
+) -> dict[str, Any] | Any | None:
+    cursor = selectFrom(connection, columns, table, where)
+    result = cursor.fetchone()
     cursor.close()
     return result
 
@@ -126,7 +145,9 @@ def root(request: Request) -> JSONResponse:
         return RESPONSE_BLANK_CLIENT_IP
     logger.info(f"{request.client.host} has accessed to root")
     return JSONResponse(
-        APIResponse("this is 2024proc sd5 API. check /docs page for documents").output()
+        APIResponse(
+            "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents"
+        ).output()
     )
 
 
@@ -140,7 +161,7 @@ def getProducts(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectallfrom(connection, "*", "products")
+    products = selectAllFrom(connection, "*", "products")
     connection.close()
     if products is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
@@ -158,14 +179,11 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    product_raw = selectallfrom(
+    product = selectOneFrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
     )
-    if product_raw is None:
-        return RESPONSE_FAILED_TO_CONNECT_DB
-    if product_raw == []:
+    if product is None:
         return RESPONSE_NO_MATCH_IN_DB
-    product = product_raw[0]
     connection.close()
     logger.info(product)
     if product is None:
@@ -183,7 +201,7 @@ def getProductCategories(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    productCategories = selectallfrom(
+    productCategories = selectAllFrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES
     )
     connection.close()
@@ -203,14 +221,11 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    productCategory_raw = selectallfrom(
+    productCategory = selectOneFrom(
         connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES, f"ID = {id}"
     )
-    if productCategory_raw is None:
-        return RESPONSE_FAILED_TO_CONNECT_DB
-    elif productCategory_raw == []:
+    if productCategory is None:
         return RESPONSE_NO_MATCH_IN_DB
-    productCategory = productCategory_raw[0]
     connection.close()
     logger.info(productCategory)
     if productCategory["ID"] == id:
