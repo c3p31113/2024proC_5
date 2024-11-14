@@ -33,7 +33,10 @@ def selectfrom(conn: MySQLConnection, target: str):
 
 def main():
     connection = connect()
-    print(selectfrom(connection, "admins"))
+    selectresults = selectfrom(connection, "admins")
+    if not selectresults is None:
+        for selectresult in selectresults:
+            print(selectresult)
     connection.close()
 
 
