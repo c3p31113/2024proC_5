@@ -2,7 +2,6 @@ from typing import Any
 from json import load
 from logging import getLogger
 from fastapi import FastAPI, status, Request
-from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
 from mysql.connector import MySQLConnection, errors as MYSQLerrors
@@ -66,14 +65,24 @@ RESPONSE_BLANK_CLIENT_IP = JSONResponse(
     media_type="charset=utf-8",
 )
 RESPONSE_NO_MATCH_IN_DB = JSONResponse(
-    content=APIResponse(
-        "specified product id wasn't found in the table", None, False
-    ).output(),
+    content=APIResponse("specified id wasn't found in the table", None, False).output(),
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     media_type="charset=utf-8",
 )
 RESPONSE_BLANK_QUERY = JSONResponse(
     content=APIResponse("query was blank.", None, False).output(),
+    status_code=status.HTTP_400_BAD_REQUEST,
+    media_type="charset=utf-8",
+)
+RESPONSE_REQUEST_PROCESSED = JSONResponse(
+    content=APIResponse("request was processed successfully.").output(),
+    status_code=status.HTTP_202_ACCEPTED,
+    media_type="charset=utf-8",
+)
+RESPONSE_REQUEST_INVALID = JSONResponse(
+    content=APIResponse(
+        "request form was invalid to read. check data structure"
+    ).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
     media_type="charset=utf-8",
 )
@@ -143,7 +152,7 @@ def selectOneFrom(
 def root(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
-    logger.info(f"{request.client.host} has accessed to root")
+    logger.debug(f"{request.client.host} has accessed to root")
     return JSONResponse(
         APIResponse(
             "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents"
@@ -175,7 +184,7 @@ def getProducts(request: Request) -> JSONResponse:
 def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
-    logger.info(f"{request.client.host} has accessed to product specifying {id}")
+    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
@@ -185,7 +194,7 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if product is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
-    logger.info(product)
+    logger.debug(product)
     if product is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
     if product["ID"] == id:
@@ -217,7 +226,7 @@ def getProductCategories(request: Request) -> JSONResponse:
 def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
-    logger.info(f"{request.client.host} has accessed to product specifying {id}")
+    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
@@ -234,6 +243,44 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
             media_type="charset=utf-8",
         )
     return RESPONSE_NO_MATCH_IN_DB
+
+
+@app.get("/v1/form")  # TODO セキュリティガバ案件すぎるので考え直したい
+def getForm(request: Request, id: int | None = None) -> JSONResponse:
+    if request.client is None:
+        return RESPONSE_BLANK_CLIENT_IP
+    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
+    if id is None:
+        return RESPONSE_BLANK_QUERY
+    connection = connect()
+    form = selectOneFrom(connection, "*", literals.DATABASE_TABLE_FORM, f"ID = {id}")
+    if form is None:
+        return RESPONSE_NO_MATCH_IN_DB
+    connection.close()
+    logger.info(form)
+    if form["ID"] == id:
+        return JSONResponse(
+            APIResponse("ok", form).output(),
+            media_type="charset=utf-8",
+        )
+    return RESPONSE_NO_MATCH_IN_DB
+
+
+@app.post("/v1/form")
+def postForm(request: Request, form: dict = {}):
+    if request.client is None:
+        return RESPONSE_BLANK_CLIENT_IP
+    logger.debug(f"{request.client.host} has posted to form with this query: {form}")
+    if not type(form["product_array"]) is list or not type(form["monpower"]) is int:
+        return RESPONSE_REQUEST_INVALID
+    form  # TODO 実際にデータベースに挿入
+    return JSONResponse(
+        APIResponse(
+            "request was processed successfully (this is dummy so pretend so)"
+        ).output(),
+        status_code=status.HTTP_202_ACCEPTED,
+        media_type="charset=utf-8",
+    )
 
 
 if __name__ == "__main__":
