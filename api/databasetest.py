@@ -1,5 +1,10 @@
-from mysql.connector import MySQLConnection, errors as MYSQLerrors
+from typing import Any
 from json import load
+from logging import getLogger
+from mysql.connector import MySQLConnection, errors as MYSQLerrors
+from mysql.connector.cursor import MySQLCursor
+
+logger = getLogger("uvicorn.app")
 
 
 def jsonload(filepath: str):
@@ -19,25 +24,44 @@ def connect(configpath="./config/dbconfig.json"):
     )
 
 
-def selectfrom(conn: MySQLConnection, target: str):
-    cursor = conn.cursor()
+def selectFrom(
+    connection: MySQLConnection, columns: str | list[str], table: str, where: str = ""
+) -> MySQLCursor:
+    cursor = connection.cursor(dictionary=True)
+    if columns is str:
+        query_columns = columns
+    else:
+        query_columns = " ".join(columns)
+    if where != "":
+        query = f"SELECT {query_columns} FROM {table} WHERE {where}"
+    else:
+        query = f"SELECT {query_columns} FROM {table}"
     try:
-        cursor.execute(f"SELECT * FROM {target}")
+        cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
-        print("the table doesn't exist!")
-        return
+        logger.error(f"query failed to run: {query}")
+    return cursor
+
+
+def selectAllFrom(
+    connection: MySQLConnection,
+    columns: str | list[str],
+    table: str,
+    where: str = "",
+) -> list[dict[str, Any] | Any] | None:
+    cursor = selectFrom(connection, columns, table, where)
     result = cursor.fetchall()
     cursor.close()
     return result
 
 
-def main():
-    connection = connect()
-    selectresults = selectfrom(connection, "admins")
-    if not selectresults is None:
-        for selectresult in selectresults:
-            print(selectresult)
-    connection.close()
-
-
-main()
+def selectOneFrom(
+    connection: MySQLConnection,
+    columns: str | list[str],
+    table: str,
+    where: str = "",
+) -> dict[str, Any] | Any | None:
+    cursor = selectFrom(connection, columns, table, where)
+    result = cursor.fetchone()
+    cursor.close()
+    return result

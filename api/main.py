@@ -1,12 +1,12 @@
 from typing import Any
-from json import load
 from logging import getLogger
 from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
-from mysql.connector import MySQLConnection, errors as MYSQLerrors
-from mysql.connector.cursor import MySQLCursor
-import literals
+
+import literals.database
+from databasetest import connect, selectAllFrom, selectOneFrom
+
 
 PORT = 3000
 RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
@@ -88,66 +88,6 @@ RESPONSE_REQUEST_INVALID = JSONResponse(
 )
 
 
-def jsonload(filepath: str):
-    with open(filepath, mode="r") as file:
-        result = load(file)
-    return result
-
-
-def connect(configpath="./config/dbconfig.json"):
-    config = jsonload(configpath)
-    return MySQLConnection(
-        host=config["host"],
-        user=config["user"],
-        password=config["password"],
-        database=config["database"],
-        collation="utf8mb4_general_ci",
-    )
-
-
-def selectFrom(
-    connection: MySQLConnection, columns: str | list[str], table: str, where: str = ""
-) -> MySQLCursor:
-    cursor = connection.cursor(dictionary=True)
-    if columns is str:
-        query_columns = columns
-    else:
-        query_columns = " ".join(columns)
-    if where != "":
-        query = f"SELECT {query_columns} FROM {table} WHERE {where}"
-    else:
-        query = f"SELECT {query_columns} FROM {table}"
-    try:
-        cursor.execute(query)
-    except MYSQLerrors.ProgrammingError:
-        logger.error(f"query failed to run: {query}")
-    return cursor
-
-
-def selectAllFrom(
-    connection: MySQLConnection,
-    columns: str | list[str],
-    table: str,
-    where: str = "",
-) -> list[dict[str, Any] | Any] | None:
-    cursor = selectFrom(connection, columns, table, where)
-    result = cursor.fetchall()
-    cursor.close()
-    return result
-
-
-def selectOneFrom(
-    connection: MySQLConnection,
-    columns: str | list[str],
-    table: str,
-    where: str = "",
-) -> dict[str, Any] | Any | None:
-    cursor = selectFrom(connection, columns, table, where)
-    result = cursor.fetchone()
-    cursor.close()
-    return result
-
-
 @app.get("/")
 def root(request: Request) -> JSONResponse:
     if request.client is None:
@@ -170,7 +110,7 @@ def getProducts(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectAllFrom(connection, "*", "products")
+    products = selectAllFrom(connection, "*", literals.database.DATABASE_TABLE_PRODUCTS)
     connection.close()
     if products is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
@@ -189,7 +129,7 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
         return RESPONSE_BLANK_QUERY
     connection = connect()
     product = selectOneFrom(
-        connection, "*", literals.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
+        connection, "*", literals.database.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
     )
     if product is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -211,7 +151,7 @@ def getProductCategories(request: Request) -> JSONResponse:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
     productCategories = selectAllFrom(
-        connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES
+        connection, "*", literals.database.DATABASE_TABLE_PRODUCTCATEGORIES
     )
     connection.close()
     if productCategories is None:
@@ -231,7 +171,10 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
         return RESPONSE_BLANK_QUERY
     connection = connect()
     productCategory = selectOneFrom(
-        connection, "*", literals.DATABASE_TABLE_PRODUCTCATEGORIES, f"ID = {id}"
+        connection,
+        "*",
+        literals.database.DATABASE_TABLE_PRODUCTCATEGORIES,
+        f"ID = {id}",
     )
     if productCategory is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -253,7 +196,9 @@ def getForm(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    form = selectOneFrom(connection, "*", literals.DATABASE_TABLE_FORM, f"ID = {id}")
+    form = selectOneFrom(
+        connection, "*", literals.database.DATABASE_TABLE_FORM, f"ID = {id}"
+    )
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
