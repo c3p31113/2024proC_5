@@ -24,8 +24,8 @@ def connect(configpath="./config/dbconfig.json"):
     )
 
 
-def selectFrom(
-    connection: MySQLConnection, columns: str | list[str], table: str, where: str = ""
+def selectCursor(
+    connection: MySQLConnection, table: str, columns: str | list[str], where: str = ""
 ) -> MySQLCursor:
     cursor = connection.cursor(dictionary=True)
     if columns is str:
@@ -45,11 +45,11 @@ def selectFrom(
 
 def selectAllFrom(
     connection: MySQLConnection,
-    columns: str | list[str],
     table: str,
+    columns: str | list[str],
     where: str = "",
 ) -> list[dict[str, Any] | Any] | None:
-    cursor = selectFrom(connection, columns, table, where)
+    cursor = selectCursor(connection, table, columns, where)
     result = cursor.fetchall()
     cursor.close()
     return result
@@ -57,11 +57,24 @@ def selectAllFrom(
 
 def selectOneFrom(
     connection: MySQLConnection,
-    columns: str | list[str],
     table: str,
+    columns: str | list[str],
     where: str = "",
 ) -> dict[str, Any] | Any | None:
-    cursor = selectFrom(connection, columns, table, where)
+    cursor = selectCursor(connection, table, columns, where)
     result = cursor.fetchone()
     cursor.close()
     return result
+
+
+def insertInto(
+    connection: MySQLConnection,
+    table: str,
+    columns: list[str],
+    values: list[str],
+) -> None:  # TODO 未動作検証
+    cursor = connection.cursor(dictionary=True)
+    query = f"INSERT INTO {table} ({" ".join(columns)}) VALUES ({" ".join(values)})"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
