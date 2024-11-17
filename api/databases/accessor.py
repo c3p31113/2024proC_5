@@ -2,7 +2,6 @@ from typing import Any
 from json import load
 from logging import getLogger
 from mysql.connector import MySQLConnection, errors as MYSQLerrors
-from mysql.connector.cursor import MySQLCursor
 
 logger = getLogger("uvicorn.app")
 
