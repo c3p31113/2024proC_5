@@ -25,17 +25,12 @@ def connect(configpath="./config/dbconfig.json"):
 
 
 def selectCursor(
-    connection: MySQLConnection, table: str, columns: str | list[str], where: str = ""
+    connection: MySQLConnection, table: str, columns: list[str], where: str = ""
 ) -> MySQLCursor:
     cursor = connection.cursor(dictionary=True)
-    if columns is str:
-        query_columns = columns
-    else:
-        query_columns = " ".join(columns)
+    query = f"SELECT {" ".join(columns)} FROM {table}"
     if where != "":
-        query = f"SELECT {query_columns} FROM {table} WHERE {where}"
-    else:
-        query = f"SELECT {query_columns} FROM {table}"
+        query = f"{query} FROM {table}"
     try:
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
@@ -46,7 +41,7 @@ def selectCursor(
 def selectAllFrom(
     connection: MySQLConnection,
     table: str,
-    columns: str | list[str],
+    columns: list[str],
     where: str = "",
 ) -> list[dict[str, Any] | Any] | None:
     cursor = selectCursor(connection, table, columns, where)
@@ -58,7 +53,7 @@ def selectAllFrom(
 def selectOneFrom(
     connection: MySQLConnection,
     table: str,
-    columns: str | list[str],
+    columns: list[str],
     where: str = "",
 ) -> dict[str, Any] | Any | None:
     cursor = selectCursor(connection, table, columns, where)

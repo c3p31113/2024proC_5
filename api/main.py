@@ -111,7 +111,11 @@ def getProducts(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectAllFrom(connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTS)
+    products = selectAllFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        ["*"],
+    )
     connection.close()
     if products is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
@@ -130,7 +134,7 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
         return RESPONSE_BLANK_QUERY
     connection = connect()
     product = selectOneFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
+        connection, databaseliterals.DATABASE_TABLE_PRODUCTS, ["*"], f"ID = {id}"
     )
     if product is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -152,7 +156,9 @@ def getProductCategories(request: Request) -> JSONResponse:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
     productCategories = selectAllFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+        ["*"],
     )
     connection.close()
     if productCategories is None:
@@ -173,8 +179,8 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     connection = connect()
     productCategory = selectOneFrom(
         connection,
-        "*",
         databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+        ["*"],
         f"ID = {id}",
     )
     if productCategory is None:
@@ -202,7 +208,7 @@ def getForm(
         return RESPONSE_BLANK_QUERY
     connection = connect()
     form = selectOneFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_FORM, f"ID = {id}"
+        connection, databaseliterals.DATABASE_TABLE_FORM, ["*"], f"ID = {id}"
     )
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
