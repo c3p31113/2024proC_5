@@ -24,10 +24,16 @@ def connect(configpath="./config/dbconfig.json"):
     )
 
 
-def selectCursor(
-    connection: MySQLConnection, table: str, columns: list[str], where: str = ""
-) -> MySQLCursor:
+def selectFrom(
+    connection: MySQLConnection,
+    table: str,
+    columns: str | list[str],
+    where: str = "",
+    oneOnly: bool = False,
+) -> Any:
     cursor = connection.cursor(dictionary=True)
+    if type(columns) is str:
+        columns = " ".join(columns)
     query = f"SELECT {" ".join(columns)} FROM {table}"
     if where != "":
         query = f"{query} FROM {table}"
@@ -35,29 +41,10 @@ def selectCursor(
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
         logger.error(f"query failed to run: {query}")
-    return cursor
-
-
-def selectAllFrom(
-    connection: MySQLConnection,
-    table: str,
-    columns: list[str],
-    where: str = "",
-) -> list[dict[str, Any] | Any] | None:
-    cursor = selectCursor(connection, table, columns, where)
-    result = cursor.fetchall()
-    cursor.close()
-    return result
-
-
-def selectOneFrom(
-    connection: MySQLConnection,
-    table: str,
-    columns: list[str],
-    where: str = "",
-) -> dict[str, Any] | Any | None:
-    cursor = selectCursor(connection, table, columns, where)
-    result = cursor.fetchone()
+    if oneOnly:
+        result = cursor.fetchone()
+    else:
+        result = cursor.fetchall()
     cursor.close()
     return result
 

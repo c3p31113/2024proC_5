@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
 
 from databases import literals as databaseliterals
-from databases.accessor import connect, selectAllFrom, selectOneFrom, insertInto
+from databases.accessor import connect, selectFrom, insertInto
 
 
 PORT = 3000
@@ -111,10 +111,10 @@ def getProducts(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectAllFrom(
+    products = selectFrom(
         connection,
         databaseliterals.DATABASE_TABLE_PRODUCTS,
-        ["*"],
+        "*",
     )
     connection.close()
     if products is None:
@@ -133,8 +133,12 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    product = selectOneFrom(
-        connection, databaseliterals.DATABASE_TABLE_PRODUCTS, ["*"], f"ID = {id}"
+    product = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+        f"ID = {id}",
+        True,
     )
     if product is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -155,10 +159,10 @@ def getProductCategories(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    productCategories = selectAllFrom(
+    productCategories = selectFrom(
         connection,
         databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-        ["*"],
+        "*",
     )
     connection.close()
     if productCategories is None:
@@ -177,11 +181,12 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    productCategory = selectOneFrom(
+    productCategory = selectFrom(
         connection,
         databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-        ["*"],
+        "*",
         f"ID = {id}",
+        True,
     )
     if productCategory is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -207,8 +212,12 @@ def getForm(
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    form = selectOneFrom(
-        connection, databaseliterals.DATABASE_TABLE_FORM, ["*"], f"ID = {id}"
+    form = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_FORM,
+        "*",
+        f"ID = {id}",
+        True,
     )
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
