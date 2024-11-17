@@ -49,12 +49,14 @@ class APIResponse(object):
         return {"valid": self.valid, "message": self.message, "body": self.body}
 
 
+MEDIA_JSON_UTF8 = "application/json; charset=utf-8"
+
 RESPONSE_FAILED_TO_CONNECT_DB = JSONResponse(
     content=APIResponse(
         "couldn't connect to database", body=None, valid=False
     ).output(),
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_BLANK_CLIENT_IP = JSONResponse(
     content=APIResponse(
@@ -63,29 +65,29 @@ RESPONSE_BLANK_CLIENT_IP = JSONResponse(
         valid=False,
     ).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_NO_MATCH_IN_DB = JSONResponse(
     content=APIResponse("specified id wasn't found in the table", None, False).output(),
     status_code=status.HTTP_200_OK,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_BLANK_QUERY = JSONResponse(
     content=APIResponse("query was blank.", None, False).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_REQUEST_PROCESSED = JSONResponse(
     content=APIResponse("request was processed successfully.").output(),
     status_code=status.HTTP_200_OK,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_REQUEST_INVALID = JSONResponse(
     content=APIResponse(
         "request form was invalid to read. check data structure"
     ).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 
 
@@ -121,7 +123,7 @@ def getProducts(request: Request) -> JSONResponse:
         return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", products).output(),
-        media_type="charset=utf-8",
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
@@ -149,7 +151,7 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if product["ID"] == id:
         return JSONResponse(
             APIResponse("ok", product).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
@@ -169,7 +171,7 @@ def getProductCategories(request: Request) -> JSONResponse:
         return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", productCategories).output(),
-        media_type="charset=utf-8",
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
@@ -195,7 +197,7 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if productCategory["ID"] == id:
         return JSONResponse(
             APIResponse("ok", productCategory).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
@@ -226,7 +228,7 @@ def getForm(
     if form["ID"] == id:
         return JSONResponse(
             APIResponse("ok", form).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
@@ -250,7 +252,7 @@ def postForm(request: Request, form: dict = {}):  # TODO 未動作検証
     return JSONResponse(
         APIResponse("request was processed successfully").output(),
         status_code=status.HTTP_200_OK,
-        media_type="charset=utf-8",
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
