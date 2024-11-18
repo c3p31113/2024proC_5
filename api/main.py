@@ -1,9 +1,13 @@
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from json import dumps
+
 from logging import getLogger
-from fastapi import FastAPI, status, Request
+from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
+
+from pydantic import BaseModel
 
 from databases import literals as databaseliterals
 from databases.accessor import connect, selectFrom, insertInto
@@ -30,88 +34,61 @@ def main():
 
 
 # TODO 出力したければoutputメソッドを呼ばないといけないことを考えると逆に面倒かもしれない
-class APIResponse(object):
-    valid: bool
+class APIResponse(BaseModel):
     message: str
+    valid: bool = True
     body: Any = None
-
-    def __init__(
-        self,
-        message: str,
-        body: Any = None,
-        valid: bool = True,
-    ) -> None:
-        self.message = message
-        self.valid = valid
-        self.body = body
-
-    def output(self) -> dict[str, Any]:
-        return {"valid": self.valid, "message": self.message, "body": self.body}
 
 
 MEDIA_JSON_UTF8 = "application/json; charset=utf-8"
 
-RESPONSE_FAILED_TO_CONNECT_DB = JSONResponse(
-    content=APIResponse(
-        "couldn't connect to database", body=None, valid=False
-    ).output(),
+EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-    media_type=MEDIA_JSON_UTF8,
+    detail="couldn't connect to database",
 )
-RESPONSE_BLANK_CLIENT_IP = JSONResponse(
-    content=APIResponse(
-        "somehow you are non-existance client. couldn't get your IP",
-        body=None,
-        valid=False,
-    ).output(),
+EXCEPTION_BLANK_CLIENT_IP = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type=MEDIA_JSON_UTF8,
+    detail="somehow you are non-existance client. couldn't get your IP",
 )
-RESPONSE_NO_MATCH_IN_DB = JSONResponse(
-    content=APIResponse("specified id wasn't found in the table", None, False).output(),
-    status_code=status.HTTP_200_OK,
-    media_type=MEDIA_JSON_UTF8,
-)
-RESPONSE_BLANK_QUERY = JSONResponse(
-    content=APIResponse("query was blank.", None, False).output(),
+EXCEPTION_BLANK_QUERY = HTTPException(
+    detail="query was blank",
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type=MEDIA_JSON_UTF8,
 )
-RESPONSE_REQUEST_PROCESSED = JSONResponse(
-    content=APIResponse("request was processed successfully.").output(),
-    status_code=status.HTTP_200_OK,
-    media_type=MEDIA_JSON_UTF8,
-)
-RESPONSE_REQUEST_INVALID = JSONResponse(
-    content=APIResponse(
-        "request form was invalid to read. check data structure"
-    ).output(),
+EXCEPTION_REQUEST_INVALID = HTTPException(
+    detail="request form was invalid to read. check data structure",
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type=MEDIA_JSON_UTF8,
+)
+
+RESPONSE_REQUEST_PROCESSED = APIResponse(
+    valid=True, message="request was processed successfully.", body=None
+)
+RESPONSE_NO_MATCH_IN_DB = APIResponse(
+    valid=True, message="specified id wasn't found in the table", body=None
 )
 
 
 @app.get("/")
-def root(request: Request) -> JSONResponse:
+def root(request: Request) -> APIResponse:
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to root")
-    return JSONResponse(
-        APIResponse(
-            "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents"
-        ).output()
-    )
+    test = {
+        "valid": True,
+        "message": "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents",
+        "body": None,
+    }
+    return APIResponse(**test)
 
 
 @app.get("/v1/")
-def v1(request: Request) -> JSONResponse:
-    return JSONResponse(APIResponse("this is 2024proc sd5 API, version 1").output())
+def v1(request: Request) -> APIResponse:
+    return APIResponse(message="this is 2024proc sd5 API, version 1")
 
 
 @app.get("/v1/products")
-def getProducts(request: Request) -> JSONResponse:
+def getProducts(request: Request) -> APIResponse:
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
     products = selectFrom(
         connection,
@@ -120,20 +97,17 @@ def getProducts(request: Request) -> JSONResponse:
     )
     connection.close()
     if products is None:
-        return RESPONSE_FAILED_TO_CONNECT_DB
-    return JSONResponse(
-        APIResponse("ok", products).output(),
-        media_type=MEDIA_JSON_UTF8,
-    )
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+    return APIResponse(message="ok", body=products)
 
 
 @app.get("/v1/product")
-def getProduct(request: Request, id: int | None = None) -> JSONResponse:
+def getProduct(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
-        return RESPONSE_BLANK_QUERY
+        raise EXCEPTION_BLANK_QUERY
     connection = connect()
     product = selectFrom(
         connection,
@@ -147,19 +121,16 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     connection.close()
     logger.debug(product)
     if product is None:
-        return RESPONSE_FAILED_TO_CONNECT_DB
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
     if product["ID"] == id:
-        return JSONResponse(
-            APIResponse("ok", product).output(),
-            media_type=MEDIA_JSON_UTF8,
-        )
+        return APIResponse(message="ok", body=product)
     return RESPONSE_NO_MATCH_IN_DB
 
 
 @app.get("/v1/productCategories")
-def getProductCategories(request: Request) -> JSONResponse:
+def getProductCategories(request: Request) -> APIResponse:
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
     productCategories = selectFrom(
         connection,
@@ -168,20 +139,17 @@ def getProductCategories(request: Request) -> JSONResponse:
     )
     connection.close()
     if productCategories is None:
-        return RESPONSE_FAILED_TO_CONNECT_DB
-    return JSONResponse(
-        APIResponse("ok", productCategories).output(),
-        media_type=MEDIA_JSON_UTF8,
-    )
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+    return APIResponse(message="ok", body=productCategories)
 
 
 @app.get("/v1/productCategory")
-def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
+def getProductCategory(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
-        return RESPONSE_BLANK_QUERY
+        raise EXCEPTION_BLANK_QUERY
     connection = connect()
     productCategory = selectFrom(
         connection,
@@ -195,10 +163,7 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     connection.close()
     logger.info(productCategory)
     if productCategory["ID"] == id:
-        return JSONResponse(
-            APIResponse("ok", productCategory).output(),
-            media_type=MEDIA_JSON_UTF8,
-        )
+        return APIResponse(message="ok", body=productCategory)
     return RESPONSE_NO_MATCH_IN_DB
 
 
@@ -206,13 +171,13 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
 def getForm(
     request: Request, id: int | None = None
 ) -> (
-    JSONResponse
+    APIResponse
 ):  # TODO 認証が必要なようにする (そもそも認証システムがまだ用意されてない)
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
-        return RESPONSE_BLANK_QUERY
+        raise EXCEPTION_BLANK_QUERY
     connection = connect()
     form = selectFrom(
         connection,
@@ -226,20 +191,17 @@ def getForm(
     connection.close()
     logger.debug(form)
     if form["ID"] == id:
-        return JSONResponse(
-            APIResponse("ok", form).output(),
-            media_type=MEDIA_JSON_UTF8,
-        )
+        return APIResponse(body="ok", message=form)
     return RESPONSE_NO_MATCH_IN_DB
 
 
 @app.post("/v1/form")
-def postForm(request: Request, form: dict = {}):  # TODO 未動作検証
+def postForm(request: Request, form: dict = {}) -> APIResponse:  # TODO 未動作検証
     if request.client is None:
-        return RESPONSE_BLANK_CLIENT_IP
+        raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
     if not type(form["product_array"]) is list or not type(form["monpower"]) is int:
-        return RESPONSE_REQUEST_INVALID
+        raise EXCEPTION_REQUEST_INVALID
     connection = connect()
     insertInto(
         connection,
@@ -249,11 +211,7 @@ def postForm(request: Request, form: dict = {}):  # TODO 未動作検証
     )
     connection.close()
     logger.debug(form)
-    return JSONResponse(
-        APIResponse("request was processed successfully").output(),
-        status_code=status.HTTP_200_OK,
-        media_type=MEDIA_JSON_UTF8,
-    )
+    return APIResponse(message="request was processed successfully")
 
 
 if __name__ == "__main__":
