@@ -4,7 +4,6 @@ from json import dumps
 
 from logging import getLogger
 from fastapi import FastAPI, status, Request, Depends, HTTPException
-from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
 
 from pydantic import BaseModel
@@ -33,14 +32,10 @@ def main():
     )
 
 
-# TODO 出力したければoutputメソッドを呼ばないといけないことを考えると逆に面倒かもしれない
 class APIResponse(BaseModel):
     message: str
-    valid: bool = True
     body: Any = None
 
-
-MEDIA_JSON_UTF8 = "application/json; charset=utf-8"
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -60,10 +55,10 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
 )
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
-    valid=True, message="request was processed successfully.", body=None
+    message="request was processed successfully.", body=None
 )
 RESPONSE_NO_MATCH_IN_DB = APIResponse(
-    valid=True, message="specified id wasn't found in the table", body=None
+    message="specified id wasn't found in the table", body=None
 )
 
 
