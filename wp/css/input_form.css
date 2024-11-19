@@ -6,74 +6,6 @@ body {
 header,
 footer {
     background-color: #ae5123;
-    /* Slightly darker light brown */
-    color: white;
-    text-align: center;
-    padding: 1rem;
-}
-
-header {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
-
-header h1 {
-    font-size: 2rem;
-}
-
-.button-container {
-    display: flex;
-    background-color: #8b4513;
-    /* dark brown */
-    color: white;
-    width: 100%;
-    position: fixed;
-    top: 4rem;
-    /* header height */
-    z-index: 900;
-    padding-top: 1.2rem;
-}
-
-.button-box {
-    flex: 1;
-    text-align: center;
-    padding: 1rem 0;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.5rem;
-}
-
-.button-box:hover {
-    background-color: chocolate;
-}
-
-footer {
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    height: 60px;
-    padding-right: 20px;
-}
-
-main {
-    margin-top: 8rem;
-    /* Adjusted for the header and button container */
-    padding: 1rem;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-}
-
-header,
-footer {
-    background-color: #ae5123;
     color: white;
     text-align: center;
     padding: 1.5rem;
@@ -118,36 +50,66 @@ header h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10rem;
-    padding: 1.5rem;
+    margin-top: 12rem;
+    /* 修正: 余白を増やして中心に移動 */
+    padding: 1rem;
+    width: 90%;
+    /* 修正: ページの余白を減らす */
+    max-width: 1000px;
+    /* 修正: コンテナを大きくする */
+    margin-left: auto;
+    /* 修正: 中央に配置 */
+    margin-right: auto;
+    /* 修正: 中央に配置 */
+    padding-bottom: 100px;
+    /* 修正: フッターに干渉しないように余白を追加 */
 }
 
 .record-container {
-    width: 90%;
-    max-width: 800px;
-    margin-bottom: 2rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    /* 修正: 余白を調整 */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    text-align: left;
 }
 
-.record-container label {
-    margin-right: 0.5rem;
-    width: 20%;
-    text-align: center;
-    font-size: 1.2rem;
+.record-container .crop-label,
+.record-container .area-label {
+    width: 50%;
+    text-align: left;
+    font-size: 1.8rem;
+    /* 修正: フォントサイズを大きくする */
+    white-space: nowrap;
 }
 
 .record-container select,
 .record-container input {
     flex: 1;
-    padding: 0.5rem;
+    padding: 0.75rem;
+    /* 修正: 入力フィールドを大きくする */
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
+    /* 修正: フォントサイズを大きくする */
 }
 
 .unit {
-    margin-left: 0.5rem;
     font-weight: bold;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+    font-size: 1.8rem;
+    /* 修正: フォントサイズをさらに大きくする */
+}
+
+.record-container.labor label {
+    font-size: 1.8rem;
+    /* 修正: フォントサイズをさらに大きくする */
+}
+
+.record-container.labor {
+    justify-content: flex-start;
 }
 
 .decide-button {
@@ -170,12 +132,23 @@ header h1 {
     background-color: #8b4513;
 }
 
-.main-labels {
-    display: flex;
-    justify-content: space-between;
-    width: 90%;
-    max-width: 420px;
-    font-size: 1.5rem;
+.add-button {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    background-color: #ae5123;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    /* 修正: ボタンを上に移動 */
+    z-index: 950;
+    /* 修正: フッターの上に表示 */
+}
+
+.add-button:hover {
+    background-color: #8b4513;
 }
 
 footer {
@@ -187,6 +160,8 @@ footer {
     align-items: center;
     height: 60px;
     padding-right: 20px;
+    z-index: 900;
+    /* 修正: フッターのz-indexを調整 */
 }
 
 @media (max-width: 768px) {
@@ -208,6 +183,18 @@ footer {
     .record-container input {
         width: 100%;
         margin-bottom: 0.5rem;
+    }
+
+    .crop-label,
+    .area-label {
+        display: none;
+        /* 修正: スマホ表示でラベルを非表示にする */
+    }
+
+    .record-container.labor {
+        flex-direction: row;
+        /* 修正: 労働人数コンテナを横並びにする */
+        align-items: center;
     }
 
     .decide-button button {

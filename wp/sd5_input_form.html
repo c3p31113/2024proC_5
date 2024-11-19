@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>書類作成補助システム</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/input_form.css">
+</head>
+
+<body>
+  <header>
+    <h1 onclick="location.href='sd5_home.html'">書類作成補助システム</h1>
+  </header>
+  <div class="button-container">
+    <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
+  </div>
+  <div class="content-container">
+    <form method="POST" id="cropForm">
+      <div class="record-container">
+        <div class="crop-label">作物</div>
+        <div class="area-label">面積</div>
+      </div>
+      <div class="record-container">
+        <select name="crop1">
+          <option value="None">---</option>
+          <option value="あんぽ柿">あんぽ柿</option>
+          <option value="いちご">いちご</option>
+          <option value="いんげん">いんげん</option>
+          <option value="きゅうり">きゅうり</option>
+          <option value="さくらんぼ">さくらんぼ</option>
+          <option value="さやえんどう">さやえんどう</option>
+          <option value="しいたけ">しいたけ</option>
+          <option value="春菊">春菊</option>
+          <option value="西洋なし">西洋なし</option>
+          <option value="ニラ">ニラ</option>
+          <option value="花わさび">花わさび</option>
+          <option value="ピーマン">ピーマン</option>
+          <option value="ぶどう">ぶどう</option>
+          <option value="桃">桃</option>
+          <option value="りんご">りんご</option>
+        </select>
+        <input type="number" name="area1" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container labor">
+        <label for="labor">労働人数：</label>
+        <input type="number" name="labor" placeholder="人数">
+        <span class="unit">人</span>
+      </div>
+      <button type="button" class="add-button" onclick="addCropArea()">+</button>
+      <div class="decide-button">
+        <button type="submit">決定</button>
+      </div>
+    </form>
+  </div>
+  <footer>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.html'">管理者ログイン</button>
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function addCropArea() {
+      const container = document.createElement('div');
+      container.className = 'record-container';
+      container.innerHTML = `
+        <select name="crop">
+          <option value="None">---</option>
+          <option value="あんぽ柿">あんぽ柿</option>
+          <option value="いちご">いちご</option>
+          <option value="いんげん">いんげん</option>
+          <option value="きゅうり">きゅうり</option>
+          <option value="さくらんぼ">さくらんぼ</option>
+          <option value="さやえんどう">さやえんどう</option>
+          <option value="しいたけ">しいたけ</option>
+          <option value="春菊">春菊</option>
+          <option value="西洋なし">西洋なし</option>
+          <option value="ニラ">ニラ</option>
+          <option value="花わさび">花わさび</option>
+          <option value="ピーマン">ピーマン</option>
+          <option value="ぶどう">ぶどう</option>
+          <option value="桃">桃</option>
+          <option value="りんご">りんご</option>
+        </select>
+        <input type="number" name="area" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      `;
+      document.getElementById('cropForm').insertBefore(container, document.querySelector('.labor'));
+    }
+  </script>
+</body>
+
+</html>

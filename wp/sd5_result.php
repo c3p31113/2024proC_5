@@ -1,22 +1,3 @@
-<?php
-$servername = "localhost"; // ホスト名
-$username = "probc"; // ユーザー名
-$password = "probc"; // パスワード
-$dbname = "probc_sd5"; // データベース名
-
-// データベース接続
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// 接続確認
-if ($conn->connect_error) {
-    die("接続失敗: " . $conn->connect_error);
-}
-
-// データベースから作物情報を取得
-$sql = "SELECT 作物リスト, 人数 FROM フォーム";
-$result = $conn->query($sql);
-
-?>
 
 <!DOCTYPE html>
 <html lang="ja">
