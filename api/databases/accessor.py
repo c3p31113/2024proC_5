@@ -31,9 +31,9 @@ def selectFrom(
     oneOnly: bool = False,
 ) -> Any:
     cursor = connection.cursor(dictionary=True)
-    if type(columns) is str:
-        columns = " ".join(columns)
-    query = f"SELECT {" ".join(columns)} FROM {table}"
+    if type(columns) is list[str]:
+        columns = ", ".join(columns)
+    query = f"SELECT {columns} FROM {table}"
     if where != "":
         query = f"{query} WHERE {where}"
     try:
@@ -55,7 +55,7 @@ def insertInto(
     values: list[str],
 ) -> None:  # TODO 未動作検証
     cursor = connection.cursor(dictionary=True)
-    query = f"INSERT INTO {table} ({" ".join(columns)}) VALUES ({" ".join(values)})"
+    query = f"INSERT INTO {table} ({", ".join(columns)}) VALUES ({", ".join(values)})"
     cursor.execute(query)
     connection.commit()
     cursor.close()

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from json import dumps
+from json import dumps, loads
 
 from logging import getLogger
 from fastapi import FastAPI, status, Request, Depends, HTTPException
@@ -184,9 +184,10 @@ def getForm(
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
+    form["product_array"] = loads(form["product_array"])
     logger.debug(form)
     if form["ID"] == id:
-        return APIResponse(body="ok", message=form)
+        return APIResponse(message="ok", body=form)
     return RESPONSE_NO_MATCH_IN_DB
 
 
@@ -195,18 +196,18 @@ def postForm(request: Request, form: dict = {}) -> APIResponse:  # TODO 未動�
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
-    if not type(form["product_array"]) is list or not type(form["monpower"]) is int:
+    if not type(form["product_array"]) is list or not type(form["manpower"]) is int:
         raise EXCEPTION_REQUEST_INVALID
     connection = connect()
     insertInto(
         connection,
         "form",
         ["product_array", "manpower"],
-        [dumps(form["product_array"]), form["manpower"]],
+        [f"'{dumps(form["product_array"])}'", str(form["manpower"])],
     )
     connection.close()
     logger.debug(form)
-    return APIResponse(message="request was processed successfully")
+    return APIResponse(message="request was processed successfully", body=True)
 
 
 if __name__ == "__main__":
