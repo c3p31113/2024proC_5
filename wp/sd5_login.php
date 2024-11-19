@@ -17,7 +17,7 @@
 
   <div class="button-container">
     <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
-    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
   </div>
 
   <main>

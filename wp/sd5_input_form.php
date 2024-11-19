@@ -99,7 +99,7 @@ function renderCropOptions()
   </header>
   <div class="button-container">
     <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
-    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
   </div>
   <div class="content-container">
     <form method="POST">
@@ -153,7 +153,7 @@ function renderCropOptions()
     </form>
   </div>
   <footer>
-    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.html'">管理者ログイン</button>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
   </footer>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
