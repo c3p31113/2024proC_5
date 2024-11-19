@@ -1,49 +1,3 @@
-<?php
-// データベースの接続設定
-$servername = "localhost"; // ホスト名
-$username = "probc"; // ユーザー名
-$password = "probc"; // パスワード
-$dbname = "probc_sd5"; // データベース名
-
-// データベース接続
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// 接続確認
-if ($conn->connect_error) {
-  die("接続失敗: " . $conn->connect_error);
-}
-
-// 成功メッセージ、エラーメッセージの初期化
-$success_message = "";
-$error_message = "";
-
-// フォームが送信された場合
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // フォームからのデータを取得
-    $id = $conn->real_escape_string($_POST['id']);
-    $password = $conn->real_escape_string($_POST['password']);
-
-    // SQL文の作成: IDとパスワードをデータベースで照合
-    $sql = "SELECT * FROM admins WHERE name = '$id' AND password = '$password'";
-
-    // SQL文の実行
-    $result = $conn->query($sql);
-
-    // 結果が1行だけあればログイン成功
-    if ($result->num_rows == 1) {
-        // ログイン成功後、test.htmlにリダイレクト
-        header("Location: test.html");
-        exit();
-    } else {
-        // ログイン失敗
-        $error_message = "ログインができませんでした。IDとパスワードが正しいかどうかお確かめください。";
-    }
-}
-
-// データベース接続を閉じる
-$conn->close();
-?>
-
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -77,13 +31,6 @@ $conn->close();
         </div>
       </div>
     </form>
-
-    <!-- エラーメッセージの表示 -->
-    <?php if (!empty($error_message)): ?>
-      <div class="alert alert-danger mt-3" role="alert">
-        <?php echo $error_message; ?>
-      </div>
-    <?php endif; ?>
   </main>
 
   <footer>

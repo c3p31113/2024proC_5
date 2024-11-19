@@ -1,18 +1,4 @@
 <?php
-// データベース接続設定
-//$servername = "localhost"; // ホスト名
-//$username = "probc"; // ユーザー名
-//$password = "probc"; // パスワード
-//$dbname = "probc_sd5"; // データベース名
-
-// データベース接続
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// 接続確認
-if ($conn->connect_error) {
-  die("接続失敗: " . $conn->connect_error);
-}
-
 // フォームが送信されたとき
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // フォームデータを取得
@@ -38,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   ]);
 
   // SQLクエリの準備
-  $sql = "INSERT INTO フォーム (作物リスト, 人数) VALUES (?, ?)";
+  $sql = "INSERT INTO form (product_categories, 人数) VALUES (?, ?)";
 
   // プリペアドステートメントを準備
   if ($stmt = $conn->prepare($sql)) {
@@ -69,11 +55,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $conn->close();
 
 // 作物のオプションを出力する関数
-function renderCropOptions() {
+function renderCropOptions()
+{
   $crops = [
-    "---", "あんぽ柿", "いちご", "いんげん", "きゅうり", "さくらんぼ",
-    "さやえんどう", "しいたけ", "春菊", "西洋なし", "ニラ", "花わさび",
-    "ピーマン", "ぶどう", "桃", "りんご"
+    "---",
+    "あんぽ柿",
+    "いちご",
+    "いんげん",
+    "きゅうり",
+    "さくらんぼ",
+    "さやえんどう",
+    "しいたけ",
+    "春菊",
+    "西洋なし",
+    "ニラ",
+    "花わさび",
+    "ピーマン",
+    "ぶどう",
+    "桃",
+    "りんご"
   ];
 
   foreach ($crops as $crop) {
@@ -90,7 +90,7 @@ function renderCropOptions() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="css/input_form.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
