@@ -1,3 +1,20 @@
+<?php
+// データベースの接続設定
+$servername = "localhost";//ホスト名（毎回変わる)
+$username = "probc";//ユーザー名
+$password = "probc";//パスワード
+$dbname = "probc_sd5";//データベース名
+
+//データベース接続
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+//接続確認
+if ($conn->connect_error) {
+  die("接続失敗: " . $conn->connect_error);
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 
