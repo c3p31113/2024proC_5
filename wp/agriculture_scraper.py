@@ -7,7 +7,7 @@ import sqlite3
 class AgricultureSpider(scrapy.Spider):
     name = "agriculture_spider"
     start_urls = [
-        'http://example1.com/crops',  # 農業情報サイト1
+        'https://www.monotaro.com/s/q-%E3%81%95%E3%82%84%E3%81%88%E3%82%93%E3%81%A9%E3%81%86%20%E7%A8%AE/?cq_plt=bp&cq_net=o&utm_source=bing&utm_medium=cpc&utm_campaign=180698424_424835292&utm_content=1353500415386533&utm_term=b_84594245979131_dat-2336393490013977:loc-96&msclkid=9c1777a78762155f0ff2109b82074057',  # 農業情報サイト1
         'http://example2.com/crops',  # 農業情報サイト2
         # 他のサイトを追加
     ]

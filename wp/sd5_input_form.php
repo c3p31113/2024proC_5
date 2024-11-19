@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   ]);
 
   // SQLクエリの準備
-  $sql = "INSERT INTO フォーム (作物リスト, 人数) VALUES (?, ?)";
+  $sql = "INSERT INTO form (product_categories, 人数) VALUES (?, ?)";
 
   // プリペアドステートメントを準備
   if ($stmt = $conn->prepare($sql)) {
@@ -90,7 +90,7 @@ function renderCropOptions() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="styles.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
