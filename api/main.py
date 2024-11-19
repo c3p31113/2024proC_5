@@ -4,6 +4,7 @@ from json import dumps, loads
 
 from logging import getLogger
 from fastapi import FastAPI, status, Request, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run as uvicornrun
 
 from pydantic import BaseModel
@@ -19,6 +20,15 @@ LOGLEVEL = "info"  # "debug", "info", "warning", "error", "critical"
 logger = getLogger("uvicorn.app")
 app = FastAPI()
 print = logger.info  # ポインタって素晴らしい
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def main():
