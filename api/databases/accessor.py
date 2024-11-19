@@ -35,7 +35,7 @@ def selectFrom(
         columns = " ".join(columns)
     query = f"SELECT {" ".join(columns)} FROM {table}"
     if where != "":
-        query = f"{query} FROM {table}"
+        query = f"{query} WHERE {where}"
     try:
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
