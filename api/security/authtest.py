@@ -19,7 +19,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 HTTPERROR_INCORRECT_USER_OR_PASS = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
@@ -160,6 +160,12 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 @app.get("/users/me/items/")
 async def read_own_items(current_user: User = Depends(get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+
+@app.get("/hash")
+async def hashPassword(password: str):
+    logger.info(SECRET_KEY)
+    return {"hash": get_password_hash(password)}
 
 
 if __name__ == "__main__":
