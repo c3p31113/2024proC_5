@@ -63,12 +63,16 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
     detail="request form was invalid to read. check data structure",
     status_code=status.HTTP_400_BAD_REQUEST,
 )
+EXCEPTION_REQUEST_FAILED_TO_PROCESS = HTTPException(
+    detail="request was failed to process.",
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
     message="request was processed successfully.", body=True
 )
 RESPONSE_NO_MATCH_IN_DB = APIResponse(
-    message="specified id wasn't found in the table", body=None
+    message="specified id wasn't found in the table", body=False
 )
 
 
@@ -209,15 +213,18 @@ def postForm(request: Request, form: dict = {}) -> APIResponse:
     if not type(form["product_array"]) is list or not type(form["manpower"]) is int:
         raise EXCEPTION_REQUEST_INVALID
     connection = connect()
-    insertInto(
+    logger.debug(form)
+    result = insertInto(
         connection,
         "form",
         ["product_array", "manpower"],
         [f"'{dumps(form["product_array"])}'", str(form["manpower"])],
     )
     connection.close()
-    logger.debug(form)
-    return RESPONSE_REQUEST_PROCESSED
+    if result:
+        return RESPONSE_REQUEST_PROCESSED
+    else:
+        raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
 
 
 @app.post("/v1/contact")
@@ -227,7 +234,7 @@ def postContact(request: Request, contact: dict = {}) -> APIResponse:
     logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
     # if not type(contact["email_address"] is str or not type(form["title"] ))
     connection = connect()
-    insertInto(
+    result = insertInto(
         connection,
         "contacts",
         ["email_address", "title", "content"],
@@ -235,7 +242,10 @@ def postContact(request: Request, contact: dict = {}) -> APIResponse:
     )
     connection.close()
     logger.debug(contact)
-    return RESPONSE_REQUEST_PROCESSED
+    if result:
+        return RESPONSE_REQUEST_PROCESSED
+    else:
+        raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
 
 
 if __name__ == "__main__":
