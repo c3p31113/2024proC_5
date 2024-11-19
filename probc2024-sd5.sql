@@ -80,7 +80,7 @@ CREATE TABLE `products` (
 -- テーブルのデータのダンプ `products`
 --
 
-INSERT INTO `products` (`ID`, `name`, `summary`, `desc`, `product_categories_ID`, `kg_per_1a`, `yen_per_1a`) VALUES
+INSERT INTO `products` (`ID`, `name`, `summary`, `desc`, `product_categories_ID`, `kg_per_1a`, `yen_per_1kg`) VALUES
 (1, 'あんぽ柿', '品種は平核無柿、蜂屋柿など', NULL, 1, 78, 240),
 (2, 'いちご', '品種はとちおとめ、さちのか、など', NULL, 2, 218, 1190),
 (3, 'いんげん', '品種はいちず、鴨川グリーンなど', NULL, 2, 72, 8678),
