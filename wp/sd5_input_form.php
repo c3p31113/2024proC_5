@@ -57,6 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   } else {
     echo "<script>alert('データベース接続に問題があります。');</script>";
   }
+
+  // Pythonスクリプトを実行
+  $command = escapeshellcmd("python3 agriculture_scraper.py '$crop_list' $labor");
+  $output = shell_exec($command);
+
+  echo "<pre>$output</pre>";
 }
 
 // 接続を閉じる
