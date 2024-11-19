@@ -1,11 +1,12 @@
 from typing import Any
+from json import dumps
 from logging import getLogger
 from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicornrun
 
 from databases import literals as databaseliterals
-from databases.accessor import connect, selectAllFrom, selectOneFrom
+from databases.accessor import connect, selectFrom, insertInto
 
 
 PORT = 3000
@@ -48,12 +49,14 @@ class APIResponse(object):
         return {"valid": self.valid, "message": self.message, "body": self.body}
 
 
+MEDIA_JSON_UTF8 = "application/json; charset=utf-8"
+
 RESPONSE_FAILED_TO_CONNECT_DB = JSONResponse(
     content=APIResponse(
         "couldn't connect to database", body=None, valid=False
     ).output(),
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    media_type="charset=utf-8",
+    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_BLANK_CLIENT_IP = JSONResponse(
     content=APIResponse(
@@ -62,29 +65,29 @@ RESPONSE_BLANK_CLIENT_IP = JSONResponse(
         valid=False,
     ).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_NO_MATCH_IN_DB = JSONResponse(
     content=APIResponse("specified id wasn't found in the table", None, False).output(),
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    media_type="charset=utf-8",
+    status_code=status.HTTP_200_OK,
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_BLANK_QUERY = JSONResponse(
     content=APIResponse("query was blank.", None, False).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_REQUEST_PROCESSED = JSONResponse(
     content=APIResponse("request was processed successfully.").output(),
-    status_code=status.HTTP_202_ACCEPTED,
-    media_type="charset=utf-8",
+    status_code=status.HTTP_200_OK,
+    media_type=MEDIA_JSON_UTF8,
 )
 RESPONSE_REQUEST_INVALID = JSONResponse(
     content=APIResponse(
         "request form was invalid to read. check data structure"
     ).output(),
     status_code=status.HTTP_400_BAD_REQUEST,
-    media_type="charset=utf-8",
+    media_type=MEDIA_JSON_UTF8,
 )
 
 
@@ -110,13 +113,17 @@ def getProducts(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    products = selectAllFrom(connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTS)
+    products = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+    )
     connection.close()
     if products is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", products).output(),
-        media_type="charset=utf-8",
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
@@ -128,8 +135,12 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    product = selectOneFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTS, f"ID = {id}"
+    product = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+        f"ID = {id}",
+        True,
     )
     if product is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -140,7 +151,7 @@ def getProduct(request: Request, id: int | None = None) -> JSONResponse:
     if product["ID"] == id:
         return JSONResponse(
             APIResponse("ok", product).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
@@ -150,15 +161,17 @@ def getProductCategories(request: Request) -> JSONResponse:
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     connection = connect()
-    productCategories = selectAllFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES
+    productCategories = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+        "*",
     )
     connection.close()
     if productCategories is None:
         return RESPONSE_FAILED_TO_CONNECT_DB
     return JSONResponse(
         APIResponse("ok", productCategories).output(),
-        media_type="charset=utf-8",
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
@@ -170,11 +183,12 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    productCategory = selectOneFrom(
+    productCategory = selectFrom(
         connection,
-        "*",
         databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+        "*",
         f"ID = {id}",
+        True,
     )
     if productCategory is None:
         return RESPONSE_NO_MATCH_IN_DB
@@ -183,48 +197,62 @@ def getProductCategory(request: Request, id: int | None = None) -> JSONResponse:
     if productCategory["ID"] == id:
         return JSONResponse(
             APIResponse("ok", productCategory).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
 
-@app.get("/v1/form")  # TODO セキュリティガバ案件すぎるので考え直したい
-def getForm(request: Request, id: int | None = None) -> JSONResponse:
+@app.get("/v1/form")
+def getForm(
+    request: Request, id: int | None = None
+) -> (
+    JSONResponse
+):  # TODO 認証が必要なようにする (そもそも認証システムがまだ用意されてない)
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
     if id is None:
         return RESPONSE_BLANK_QUERY
     connection = connect()
-    form = selectOneFrom(
-        connection, "*", databaseliterals.DATABASE_TABLE_FORM, f"ID = {id}"
+    form = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_FORM,
+        "*",
+        f"ID = {id}",
+        True,
     )
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
-    logger.info(form)
+    logger.debug(form)
     if form["ID"] == id:
         return JSONResponse(
             APIResponse("ok", form).output(),
-            media_type="charset=utf-8",
+            media_type=MEDIA_JSON_UTF8,
         )
     return RESPONSE_NO_MATCH_IN_DB
 
 
 @app.post("/v1/form")
-def postForm(request: Request, form: dict = {}):
+def postForm(request: Request, form: dict = {}):  # TODO 未動作検証
     if request.client is None:
         return RESPONSE_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
     if not type(form["product_array"]) is list or not type(form["monpower"]) is int:
         return RESPONSE_REQUEST_INVALID
-    form  # TODO 実際にデータベースに挿入
+    connection = connect()
+    insertInto(
+        connection,
+        "form",
+        ["product_array", "manpower"],
+        [dumps(form["product_array"]), form["manpower"]],
+    )
+    connection.close()
+    logger.debug(form)
     return JSONResponse(
-        APIResponse(
-            "request was processed successfully (this is dummy so pretend so)"
-        ).output(),
-        status_code=status.HTTP_202_ACCEPTED,
-        media_type="charset=utf-8",
+        APIResponse("request was processed successfully").output(),
+        status_code=status.HTTP_200_OK,
+        media_type=MEDIA_JSON_UTF8,
     )
 
 
