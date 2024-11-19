@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from json import dumps, loads
 
-from logging import getLogger
+from logging import getLogger, getLevelNamesMapping
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run as uvicornrun
@@ -36,7 +36,7 @@ def main():
         "main:app",
         host="0.0.0.0",
         port=PORT,
-        log_level=LOGLEVEL.lower(),
+        log_level=getLevelNamesMapping()[LOGLEVEL.upper()],
         reload=RELOAD,
         log_config="config/log_config.yaml",
     )
@@ -237,8 +237,18 @@ def postContact(request: Request, contact: dict = {}) -> APIResponse:
     result = insertInto(
         connection,
         "contacts",
-        ["email_address", "title", "content"],
-        [contact["email_address"], contact["title"], contact["content"]],
+        [
+            "email_address",
+            "form_id",
+            "title",
+            "content",
+        ],
+        [
+            contact["email_address"],
+            contact["form_id"],
+            contact["title"],
+            contact["content"],
+        ],
     )
     connection.close()
     logger.debug(contact)

@@ -31,9 +31,15 @@ async function post(path, content) {
     })
 }
 export async function postForm(form) {
-    const apihost = getAPIhost();
     if (typeof (form.manpower) != "number" || typeof (form.product_array) != "object") {
-        console.error({ "wrong form format": form })
+        console.error({ "message": "wrong form format", "form": form });
     }
     post("/v1/form", form)
+}
+
+export async function postContact(contact) {
+    if (typeof (contact.email_address) != "string" || typeof (contact.title) != "string" || typeof (contact.content) != "string") {
+        console.error({ "message": "wrong form format", "form": form });
+    }
+    post("/v1/contact", contact)
 }
