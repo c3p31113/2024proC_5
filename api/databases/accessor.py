@@ -53,7 +53,7 @@ def insertInto(
     table: str,
     columns: list[str],
     values: list[str],
-) -> None:  # TODO 未動作検証
+) -> None:
     cursor = connection.cursor(dictionary=True)
     query = f"INSERT INTO {table} ({", ".join(columns)}) VALUES ({", ".join(values)})"
     cursor.execute(query)
