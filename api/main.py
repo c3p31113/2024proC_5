@@ -65,7 +65,7 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
 )
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
-    message="request was processed successfully.", body=None
+    message="request was processed successfully.", body=True
 )
 RESPONSE_NO_MATCH_IN_DB = APIResponse(
     message="specified id wasn't found in the table", body=None
@@ -202,7 +202,7 @@ def getForm(
 
 
 @app.post("/v1/form")
-def postForm(request: Request, form: dict = {}) -> APIResponse:  # TODO 未動作検証
+def postForm(request: Request, form: dict = {}) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
@@ -217,7 +217,25 @@ def postForm(request: Request, form: dict = {}) -> APIResponse:  # TODO 未動�
     )
     connection.close()
     logger.debug(form)
-    return APIResponse(message="request was processed successfully", body=True)
+    return RESPONSE_REQUEST_PROCESSED
+
+
+@app.post("/v1/contact")
+def postContact(request: Request, contact: dict = {}) -> APIResponse:
+    if request.client is None:
+        raise EXCEPTION_BLANK_CLIENT_IP
+    logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
+    # if not type(contact["email_address"] is str or not type(form["title"] ))
+    connection = connect()
+    insertInto(
+        connection,
+        "contacts",
+        ["email_address", "title", "content"],
+        [contact["email_address"], contact["title"], contact["content"]],
+    )
+    connection.close()
+    logger.debug(contact)
+    return RESPONSE_REQUEST_PROCESSED
 
 
 if __name__ == "__main__":
