@@ -6,111 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    header,
-    footer {
-      background-color: #ae5123;
-      /* Slightly darker light brown */
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-
-    header {
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 1000;
-    }
-
-    header h1 {
-      font-size: 2rem;
-    }
-
-    .button-container {
-      display: flex;
-      background-color: #8b4513;
-      /* dark brown */
-      color: white;
-      width: 100%;
-      position: fixed;
-      top: 4rem;
-      /* header height */
-      z-index: 900;
-    }
-
-    .button-box {
-      flex: 1;
-      text-align: center;
-      padding: 1rem 0;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1.5rem;
-    }
-
-    .button-box:hover {
-      background-color: chocolate;
-    }
-
-    footer {
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      height: 60px;
-      padding-right: 20px;
-    }
-
-    main {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      padding: 1rem;
-    }
-
-    .start-button {
-      background-color: #8b4513;
-      color: white;
-      padding: 1.5rem 3rem;
-      font-size: 1.8rem;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      display: block;
-      margin: 0 auto;
-    }
-
-    .start-button:hover {
-      background-color: chocolate;
-    }
-
-    .description-container {
-      background-color: #dcdcdc;
-      /* light grey */
-      padding: 2rem;
-      border-radius: 10px;
-      margin-bottom: 2rem;
-      display: inline-block;
-      text-align: left;
-      /* Ensure text alignment inside container */
-      width: 70%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .description {
-      font-size: 1.5rem;
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -120,7 +16,7 @@
 
   <div class="button-container">
     <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
-    <div class="button-box" onclick="location.href='sd5_contact.html'">問い合わせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
   </div>
 
   <main>
@@ -134,7 +30,7 @@
   </main>
 
   <footer>
-    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.html'">管理者ログイン</button>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
   </footer>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
