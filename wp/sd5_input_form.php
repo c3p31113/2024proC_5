@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>書類作成補助システム</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header>
+    <h1 onclick="location.href='sd5_home.html'">書類作成補助システム</h1>
+  </header>
+  <div class="button-container">
+    <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
+    <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
+  </div>
+  <div class="content-container">
+    <form method="POST">
+      <div class="main-labels">
+        <label>作物</label>
+        <label>面積</label>
+      </div>
+      <div class="record-container">
+        <select name="crop1">
+          <?php renderCropOptions(); ?>
+        </select>
+        <input type="number" name="area1" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container">
+        <select name="crop2">
+          <?php renderCropOptions(); ?>
+        </select>
+        <input type="number" name="area2" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container">
+        <select name="crop3">
+          <?php renderCropOptions(); ?>
+        </select>
+        <input type="number" name="area3" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container">
+        <select name="crop4">
+          <?php renderCropOptions(); ?>
+        </select>
+        <input type="number" name="area4" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container">
+        <select name="crop5">
+          <?php renderCropOptions(); ?>
+        </select>
+        <input type="number" name="area5" placeholder="面積">
+        <span class="unit">a(アール)</span>
+      </div>
+      <div class="record-container">
+        <label for="labor">労働人数:</label>
+        <input type="number" name="labor" placeholder="人数">
+        <span class="unit">人</span>
+      </div>
+      <div class="decide-button">
+        <button type="submit">決定</button>
+      </div>
+    </form>
+  </div>
+  <footer>
+    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -40,6 +40,7 @@ def selectFrom(
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
         logger.error(f"query failed to run: {query}")
+        return None
     if oneOnly:
         result = cursor.fetchone()
     else:
@@ -53,9 +54,14 @@ def insertInto(
     table: str,
     columns: list[str],
     values: list[str],
-) -> None:  # TODO 未動作検証
+) -> bool:
     cursor = connection.cursor(dictionary=True)
     query = f"INSERT INTO {table} ({", ".join(columns)}) VALUES ({", ".join(values)})"
-    cursor.execute(query)
+    try:
+        cursor.execute(query)
+    except MYSQLerrors.ProgrammingError:
+        logger.error(f"query failed to run: {query}")
+        return False
     connection.commit()
     cursor.close()
+    return True
