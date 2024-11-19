@@ -1,9 +1,9 @@
 <?php
 // データベース接続設定
-$servername = "localhost"; // ホスト名
-$username = "probc"; // ユーザー名
-$password = "probc"; // パスワード
-$dbname = "probc_sd5"; // データベース名
+//$servername = "localhost"; // ホスト名
+//$username = "probc"; // ユーザー名
+//$password = "probc"; // パスワード
+//$dbname = "probc_sd5"; // データベース名
 
 // データベース接続
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -90,7 +90,7 @@ function renderCropOptions() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="styles.css" rel="stylesheet">
+  <link href="css/input_form.css" rel="stylesheet">
 </head>
 
 <body>
