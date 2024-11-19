@@ -10,3 +10,18 @@ Content-Type: application/json
 
 GET https://api.sampleapis.com/coffee/hot HTTP/1.1
 Content-Type: application/json
+
+###
+POST http://127.0.0.1:3000/v1/form HTTP/1.1
+Content-Type: application/json
+
+{
+    "product_array": [
+        {
+            "id" : 1,
+            "amount": 2.0
+        }
+    ],
+    "monpower": 5
+}
+###
