@@ -16,10 +16,10 @@ async function Main() {
         card.textContent = product.name + " " + product.summary;
         base.appendChild(card);
     });
-    postForm({
-        "product_array": [
+    // postForm({
+    //     "product_array": [
 
-        ],
-        "manpower": 1
-    });
+    //     ],
+    //     "manpower": 1
+    // });
 }
