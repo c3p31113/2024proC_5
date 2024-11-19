@@ -6,125 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>書類作成補助システム</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/input-contact.css">
 
-    header,
-    footer {
-      background-color: #ae5123;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-
-    header {
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 1000;
-    }
-
-    header h1 {
-      font-size: 2rem;
-    }
-
-    .button-container {
-      display: flex;
-      background-color: #8b4513;
-      color: white;
-      width: 100%;
-      position: fixed;
-      top: 4rem;
-      z-index: 900;
-    }
-
-    .button-box {
-      flex: 1;
-      text-align: center;
-      padding: 1rem 0;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1.5rem;
-    }
-
-    .button-box:hover {
-      background-color: chocolate;
-    }
-
-    .login-container {
-      position: fixed;
-      top: 16rem;
-      left: 50%;
-      transform: translate(-50%);
-      background-color: #dcdcdc;
-      padding: 2rem;
-      text-align: left;
-      width: 80%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-    }
-
-    .login-button {
-      width: min-content;
-      background-color: #8b4513;
-      color: white;
-      padding: 0.3rem 0.8rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      display: block;
-      margin: 1rem auto 0;
-    }
-
-    .in-login-button {
-      background-color: #8b4513;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    footer {
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      height: 60px;
-      padding-right: 20px;
-    }
-
-    main {
-      margin-top: 8rem;
-      padding: 1rem;
-    }
-
-    .login-header {
-      position: fixed;
-      top: 13rem;
-      /* Adjusted to be just below header */
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      z-index: 1001;
-    }
-
-    .login-container {
-      margin-top: -1rem;
-    }
-  </style>
 </head>
 
 <body>
@@ -138,19 +22,18 @@
   </div>
 
   <main>
-    <h1 class="login-header">管理者ログイン</h1>
+    <h1 class="page-header">管理者ログイン</h1>
     <form action="#" method="post">
-      <div class="login-container">
-        <p>ログインID:<br><input type="text" name="text" /></p>
-        <p>パスワード:<br><input type="password" name="password" /></p>
-        <p class="login-button">
-          <input class="in-login-button" type="submit" value="送信する">
-        </p>
+      <div class="container">
+        <div>ログインID:<br><input class="field" type="text" name="text" /></div>
+        <div>パスワード:<br><input class="field" type="password" name="password" /></div>
+        <div class="send-button">
+          <input class="in-send-button" type="submit" value="ログイン">
+        </div>
       </div>
     </form>
   </main>
   <footer>
-    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.html'">管理者ログイン</button>
   </footer>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
