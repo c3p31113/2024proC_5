@@ -1,4 +1,4 @@
-import { getProducts } from "./APIaccessor.js";
+import { getProducts, postForm } from "./APIaccessor.js";
 
 window.onload = function onload() {
     Main();
@@ -15,5 +15,11 @@ async function Main() {
         let card = document.createElement("p")
         card.textContent = product.name + " " + product.summary;
         base.appendChild(card);
+    });
+    postForm({
+        "product_array": [
+
+        ],
+        "manpower": 1
     });
 }
