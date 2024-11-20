@@ -3,16 +3,15 @@ from typing import Any
 from json import dumps, loads
 
 from logging import getLogger, getLevelNamesMapping
+from uvicorn import run as uvicornrun
+from pydantic import BaseModel
+
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from uvicorn import run as uvicornrun
-
-from pydantic import BaseModel
 
 from databases import literals as databaseliterals
 from databases.accessor import connect, selectFrom, insertInto
-
 import security.authenticate as auth
 
 
@@ -93,12 +92,12 @@ def root(request: Request) -> APIResponse:
 
 
 @app.get("/v1/")
-def v1(request: Request) -> APIResponse:
+def v1_root(request: Request) -> APIResponse:
     return APIResponse(message="this is 2024proc sd5 API, version 1")
 
 
 @app.get("/v1/products")
-def getProducts(request: Request) -> APIResponse:
+def get_products(request: Request) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
@@ -114,7 +113,7 @@ def getProducts(request: Request) -> APIResponse:
 
 
 @app.get("/v1/product")
-def getProduct(request: Request, id: int | None = None) -> APIResponse:
+def get_product(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
@@ -140,7 +139,7 @@ def getProduct(request: Request, id: int | None = None) -> APIResponse:
 
 
 @app.get("/v1/productCategories")
-def getProductCategories(request: Request) -> APIResponse:
+def get_product_categories(request: Request) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
@@ -156,7 +155,7 @@ def getProductCategories(request: Request) -> APIResponse:
 
 
 @app.get("/v1/productCategory")
-def getProductCategory(request: Request, id: int | None = None) -> APIResponse:
+def get_product_category(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(
@@ -182,7 +181,7 @@ def getProductCategory(request: Request, id: int | None = None) -> APIResponse:
 
 
 @app.get("/v1/form")
-def getForm(
+def get_form(
     request: Request,
     id: int | None = None,
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
@@ -212,7 +211,7 @@ def getForm(
 
 
 @app.post("/v1/form")
-def postForm(request: Request, form: dict = {}) -> APIResponse:
+def post_form(request: Request, form: dict = {}) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
@@ -234,7 +233,7 @@ def postForm(request: Request, form: dict = {}) -> APIResponse:
 
 
 @app.post("/v1/contact")
-def postContact(request: Request, contact: dict = {}) -> APIResponse:
+def post_contact(request: Request, contact: dict = {}) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
