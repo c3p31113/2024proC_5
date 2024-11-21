@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Any
 from json import dumps, loads
 
-from logging import getLogger, getLevelNamesMapping
+from logging import getLogger
 from uvicorn import run as uvicornrun
 from pydantic import BaseModel
 
@@ -17,7 +17,6 @@ import security.authenticate as auth
 
 PORT = 3000
 RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
-LOGLEVEL = "debug"  # "debug", "info", "warning", "error", "critical"
 
 logger = getLogger("uvicorn.app")
 app = FastAPI()
@@ -38,7 +37,6 @@ def main():
         "main:app",
         host="0.0.0.0",
         port=PORT,
-        log_level=getLevelNamesMapping()[LOGLEVEL.upper()],
         reload=RELOAD,
         log_config="config/log_config.yaml",
     )
