@@ -54,6 +54,15 @@ class Contact(BaseModel):
     content: str
 
 
+class Form(BaseModel):
+    class Product(BaseModel):
+        id: int
+        amount: float
+
+    product_array: list[Product]
+    manpower: int
+
+
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     detail="couldn't connect to database",
@@ -83,7 +92,7 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
-def log_accessor(request: Request) -> Request:
+def log_accessor(request: Request) -> None:
     request_path = request.scope["path"]
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
@@ -91,7 +100,6 @@ def log_accessor(request: Request) -> Request:
     request_params = request.scope["query_string"]
     if request_params:
         logger.debug(f"params were {request_params}")
-    return request
 
 
 @app.get("/")
@@ -164,14 +172,9 @@ def get_product_categories(_request=Depends(log_accessor)) -> APIResponse:
 
 @app.get("/v1/productCategory")
 def get_product_category(
-    request: Request,
+    _request=Depends(log_accessor),
     id: int | None = None,
 ) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(
-        f"{request.client.host} has accessed to productCategory specifying {id}"
-    )
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -220,10 +223,10 @@ def get_form(
 
 @app.post("/v1/form")
 def post_form(
+    form: Form,
     _request=Depends(log_accessor),
-    form: dict = {},
 ) -> APIResponse:
-    if not type(form["product_array"]) is list or not type(form["manpower"]) is int:
+    if not type(form.product_array) is list or not type(form.manpower) is int:
         raise EXCEPTION_REQUEST_INVALID
     connection = connect()
     logger.debug(form)
@@ -231,7 +234,7 @@ def post_form(
         connection,
         "form",
         ["product_array", "manpower"],
-        [f"'{dumps(form["product_array"])}'", str(form["manpower"])],
+        [f"'{dumps(form.product_array)}'", str(form.manpower)],
     )
     connection.close()
     if result:
