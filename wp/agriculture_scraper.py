@@ -7,7 +7,7 @@ import sqlite3
 class AgricultureSpider(scrapy.Spider):
     name = "agriculture_spider"
     start_urls = [
-        '',  # 農業情報サイト1
+        'http://example1.com/crops',  # 農業情報サイト1
         'http://example2.com/crops',  # 農業情報サイト2
         # 他のサイトを追加
     ]
@@ -27,11 +27,13 @@ class AgricultureSpider(scrapy.Spider):
             fertilizer = crop_div.find('span', class_='fertilizer').text
             pesticide = crop_div.find('span', class_='pesticide').text
             growing_season = crop_div.find('span', class_='season').text
+            price = crop_div.find('span', class_='price').text  # 価格情報を取得
             crops.append({
                 'name': name,
                 'fertilizer': fertilizer,
                 'pesticide': pesticide,
                 'growing_season': growing_season,
+                'price': price,  # 価格情報を追加
             })
         self.save_to_db(crops)
 
@@ -39,10 +41,10 @@ class AgricultureSpider(scrapy.Spider):
         conn = sqlite3.connect('probc_sd5.db')
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS crops
-                     (name text, fertilizer text, pesticide text, growing_season text)''')
+                     (name text, fertilizer text, pesticide text, growing_season text, price text)''')
         for crop in crops:
-            c.execute("INSERT INTO crops VALUES (?, ?, ?, ?)",
-                      (crop['name'], crop['fertilizer'], crop['pesticide'], crop['growing_season']))
+            c.execute("INSERT INTO crops VALUES (?, ?, ?, ?, ?)",
+                      (crop['name'], crop['fertilizer'], crop['pesticide'], crop['growing_season'], crop['price']))
         conn.commit()
         conn.close()
 
