@@ -53,10 +53,25 @@ def insertInto(
     connection: MySQLConnection,
     table: str,
     columns: list[str],
-    values: list[str],
+    values: list[str | int | None],
 ) -> bool:
+    if len(columns) != len(values):
+        logger.info("different len between columns and values")
+        return False
     cursor = connection.cursor(dictionary=True)
-    query = f"INSERT INTO {table} ({", ".join(columns)}) VALUES ({", ".join(values)})"
+    value_result = []
+    columns_result = []
+    for i, value in enumerate(values):
+        if value is None:
+            continue
+        if type(value) is int or (type(value) is str and value.isdecimal()):
+            value_result.append(str(value))
+        elif type(value) is str:
+            value_result.append(f'"{value}"')
+        columns_result.append(columns[i])
+        continue
+    query = f"INSERT INTO {table} ({", ".join(columns_result)}) VALUES ({", ".join(value_result)})"
+    logger.debug(query)
     try:
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:

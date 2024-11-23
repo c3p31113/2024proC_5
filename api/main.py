@@ -47,6 +47,13 @@ class APIResponse(BaseModel):
     body: Any = None
 
 
+class Contact(BaseModel):
+    email_address: str
+    form_id: int | None = None
+    title: str
+    content: str
+
+
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     detail="couldn't connect to database",
@@ -76,28 +83,33 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
-@app.get("/")
-def root(request: Request) -> APIResponse:
+def log_accessor(request: Request) -> Request:
+    request_path = request.scope["path"]
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to root")
+    logger.debug(f"{request.client.host} has accessed to {request_path}")
+    request_params = request.scope["query_string"]
+    if request_params:
+        logger.debug(f"params were {request_params}")
+    return request
+
+
+@app.get("/")
+def root(_request=Depends(log_accessor)) -> APIResponse:
     test = {
-        "valid": True,
         "message": "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents",
-        "body": None,
+        "body": True,
     }
     return APIResponse(**test)
 
 
 @app.get("/v1/")
-def v1_root(request: Request) -> APIResponse:
+def v1_root() -> APIResponse:
     return APIResponse(message="this is 2024proc sd5 API, version 1")
 
 
 @app.get("/v1/products")
-def get_products(request: Request) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
+def get_products(_request=Depends(log_accessor)) -> APIResponse:
     connection = connect()
     products = selectFrom(
         connection,
@@ -111,10 +123,10 @@ def get_products(request: Request) -> APIResponse:
 
 
 @app.get("/v1/product")
-def get_product(request: Request, id: int | None = None) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
+def get_product(
+    _request=Depends(log_accessor),
+    id: int | None = None,
+) -> APIResponse:
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -137,9 +149,7 @@ def get_product(request: Request, id: int | None = None) -> APIResponse:
 
 
 @app.get("/v1/productCategories")
-def get_product_categories(request: Request) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
+def get_product_categories(_request=Depends(log_accessor)) -> APIResponse:
     connection = connect()
     productCategories = selectFrom(
         connection,
@@ -153,7 +163,10 @@ def get_product_categories(request: Request) -> APIResponse:
 
 
 @app.get("/v1/productCategory")
-def get_product_category(request: Request, id: int | None = None) -> APIResponse:
+def get_product_category(
+    request: Request,
+    id: int | None = None,
+) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(
@@ -180,13 +193,10 @@ def get_product_category(request: Request, id: int | None = None) -> APIResponse
 
 @app.get("/v1/form")
 def get_form(
-    request: Request,
     id: int | None = None,
+    _request=Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to form specifying {id}")
     logger.info(f"{current_admin.username} has accessed to form specifying {id}")
     if id is None:
         raise EXCEPTION_BLANK_QUERY
@@ -209,10 +219,10 @@ def get_form(
 
 
 @app.post("/v1/form")
-def post_form(request: Request, form: dict = {}) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has posted to form with this query: {form}")
+def post_form(
+    _request=Depends(log_accessor),
+    form: dict = {},
+) -> APIResponse:
     if not type(form["product_array"]) is list or not type(form["manpower"]) is int:
         raise EXCEPTION_REQUEST_INVALID
     connection = connect()
@@ -231,26 +241,27 @@ def post_form(request: Request, form: dict = {}) -> APIResponse:
 
 
 @app.post("/v1/contact")
-def post_contact(request: Request, contact: dict = {}) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
+def post_contact(
+    contact: Contact,
+    _request=Depends(log_accessor),
+) -> APIResponse:
+    COLUMNS = [
+        "email_address",
+        "form_id",
+        "title",
+        "content",
+    ]
     # if not type(contact["email_address"] is str or not type(form["title"] ))
     connection = connect()
     result = insertInto(
         connection,
         "contacts",
+        COLUMNS,
         [
-            "email_address",
-            "form_id",
-            "title",
-            "content",
-        ],
-        [
-            contact["email_address"],
-            contact["form_id"],
-            contact["title"],
-            contact["content"],
+            contact.email_address,
+            contact.form_id,
+            contact.title,
+            contact.content,
         ],
     )
     connection.close()
@@ -263,7 +274,8 @@ def post_contact(request: Request, contact: dict = {}) -> APIResponse:
 
 @app.post("/v1/token")
 async def login_for_access_token(
-    request: Request, form_data: OAuth2PasswordRequestForm = Depends()
+    _request=Depends(log_accessor),
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> auth.Token:
     admin = auth.authenticate_admin(form_data.username, form_data.password)
     if not admin:
