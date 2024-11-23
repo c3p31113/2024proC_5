@@ -1,58 +1,30 @@
-import sys
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from bs4 import BeautifulSoup
-import sqlite3
 
 class AgricultureSpider(scrapy.Spider):
-    name = "agriculture_spider"
+    name = "Agriculture_spider"
     start_urls = [
-        'http://example1.com/crops',  # 農業情報サイト1
-        'http://example2.com/crops',  # 農業情報サイト2
-        # 他のサイトを追加
+        "https://www.kobayashi-seed.com/view/item/000000009278", #サンプル
+        "https://www.kobayashi-seed.com/view/item/000000009279",
+        "https://www.kobayashi-seed.com/view/item/000000009280",
     ]
 
-    def __init__(self, crop, area, workers, *args, **kwargs):
-        super(AgricultureSpider, self).__init__(*args, **kwargs)
-        self.crop = crop
-        self.area = area
-        self.workers = workers
-
     def parse(self, response):
-        # Beautiful Soupを使用してHTMLを解析
-        soup = BeautifulSoup(response.text, 'html.parser')
-        crops = []
-        for crop_div in soup.find_all('div', class_='crop'):
-            name = crop_div.find('h2').text
-            fertilizer = crop_div.find('span', class_='fertilizer').text
-            pesticide = crop_div.find('span', class_='pesticide').text
-            growing_season = crop_div.find('span', class_='season').text
-            price = crop_div.find('span', class_='price').text  # 価格情報を取得
-            crops.append({
-                'name': name,
-                'fertilizer': fertilizer,
-                'pesticide': pesticide,
-                'growing_season': growing_season,
-                'price': price,  # 価格情報を追加
-            })
-        self.save_to_db(crops)
+        soup = BeautifulSoup(response.text, "html.parser")
 
-    def save_to_db(self, crops):
-        conn = sqlite3.connect('probc_sd5.db')
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS crops
-                     (name text, fertilizer text, pesticide text, growing_season text, price text)''')
-        for crop in crops:
-            c.execute("INSERT INTO crops VALUES (?, ?, ?, ?, ?)",
-                      (crop['name'], crop['fertilizer'], crop['pesticide'], crop['growing_season'], crop['price']))
-        conn.commit()
-        conn.close()
+        # 商品名と価格を取得
+        product_name = soup.find("h1", class_="p-product-head__title").get_text(strip=True)  #サイトのclassによって変わる
+        product_price = soup.find("span", class_="p-product-content__price-number").get_text(strip=True) #同上
+
+        # 結果を表示
+        print(f"URL: {response.url}")
+        print(f"商品名: {product_name}")
+        print(f"価格: {product_price}")
 
 if __name__ == "__main__":
-    crop = sys.argv[1]
-    area = sys.argv[2]
-    workers = sys.argv[3]
-
-    process = CrawlerProcess()
-    process.crawl(AgricultureSpider, crop=crop, area=area, workers=workers)
+    process = CrawlerProcess(settings={
+        "LOG_LEVEL": "ERROR",
+    })
+    process.crawl(AgricultureSpider)
     process.start()
