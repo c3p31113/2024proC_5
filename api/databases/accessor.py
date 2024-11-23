@@ -31,7 +31,7 @@ def selectFrom(
     oneOnly: bool = False,
 ) -> Any:
     cursor = connection.cursor(dictionary=True)
-    if type(columns) is list[str]:
+    if type(columns) is list:
         columns = ", ".join(columns)
     query = f"SELECT {columns} FROM {table}"
     if where != "":
@@ -42,7 +42,7 @@ def selectFrom(
         logger.error(f"query failed to run: {query}")
         return None
     if oneOnly:
-        result = cursor.fetchone()
+        result = cursor.fetchall()[0]
     else:
         result = cursor.fetchall()
     cursor.close()
@@ -63,5 +63,25 @@ def insertInto(
         logger.error(f"query failed to run: {query}")
         return False
     connection.commit()
+    cursor.close()
+    return True
+
+
+def update(
+    connection: MySQLConnection,
+    table: str,
+    column: str,
+    value: str,
+    where: str = "",
+) -> bool:
+    cursor = connection.cursor(dictionary=True)
+    query = f"UPDATE {table} SET {column} = {value}"
+    if where != "":
+        query = f"{query} WHERE {where}"
+    try:
+        cursor.execute(query)
+    except MYSQLerrors.ProgrammingError:
+        logger.error(f"query failed to run: {query}")
+        return False
     cursor.close()
     return True

@@ -1,21 +1,23 @@
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from typing import Any
 from json import dumps, loads
 
 from logging import getLogger, getLevelNamesMapping
-from fastapi import FastAPI, status, Request, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run as uvicornrun
-
 from pydantic import BaseModel
+
+from fastapi import FastAPI, status, Request, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 
 from databases import literals as databaseliterals
 from databases.accessor import connect, selectFrom, insertInto
+import security.authenticate as auth
 
 
 PORT = 3000
 RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
-LOGLEVEL = "info"  # "debug", "info", "warning", "error", "critical"
+LOGLEVEL = "debug"  # "debug", "info", "warning", "error", "critical"
 
 logger = getLogger("uvicorn.app")
 app = FastAPI()
@@ -90,12 +92,12 @@ def root(request: Request) -> APIResponse:
 
 
 @app.get("/v1/")
-def v1(request: Request) -> APIResponse:
+def v1_root(request: Request) -> APIResponse:
     return APIResponse(message="this is 2024proc sd5 API, version 1")
 
 
 @app.get("/v1/products")
-def getProducts(request: Request) -> APIResponse:
+def get_products(request: Request) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
@@ -111,7 +113,7 @@ def getProducts(request: Request) -> APIResponse:
 
 
 @app.get("/v1/product")
-def getProduct(request: Request, id: int | None = None) -> APIResponse:
+def get_product(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has accessed to product specifying {id}")
@@ -137,7 +139,7 @@ def getProduct(request: Request, id: int | None = None) -> APIResponse:
 
 
 @app.get("/v1/productCategories")
-def getProductCategories(request: Request) -> APIResponse:
+def get_product_categories(request: Request) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     connection = connect()
@@ -153,10 +155,12 @@ def getProductCategories(request: Request) -> APIResponse:
 
 
 @app.get("/v1/productCategory")
-def getProductCategory(request: Request, id: int | None = None) -> APIResponse:
+def get_product_category(request: Request, id: int | None = None) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
+    logger.debug(
+        f"{request.client.host} has accessed to productCategory specifying {id}"
+    )
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -177,14 +181,15 @@ def getProductCategory(request: Request, id: int | None = None) -> APIResponse:
 
 
 @app.get("/v1/form")
-def getForm(
-    request: Request, id: int | None = None
-) -> (
-    APIResponse
-):  # TODO 認証が必要なようにする (そもそも認証システムがまだ用意されてない)
+def get_form(
+    request: Request,
+    id: int | None = None,
+    current_admin: auth.Admin = Depends(auth.get_current_active_user),
+) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
+    logger.debug(f"{request.client.host} has accessed to form specifying {id}")
+    logger.info(f"{current_admin.username} has accessed to form specifying {id}")
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -206,7 +211,7 @@ def getForm(
 
 
 @app.post("/v1/form")
-def postForm(request: Request, form: dict = {}) -> APIResponse:
+def post_form(request: Request, form: dict = {}) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {form}")
@@ -228,7 +233,7 @@ def postForm(request: Request, form: dict = {}) -> APIResponse:
 
 
 @app.post("/v1/contact")
-def postContact(request: Request, contact: dict = {}) -> APIResponse:
+def post_contact(request: Request, contact: dict = {}) -> APIResponse:
     if request.client is None:
         raise EXCEPTION_BLANK_CLIENT_IP
     logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
@@ -256,6 +261,27 @@ def postContact(request: Request, contact: dict = {}) -> APIResponse:
         return RESPONSE_REQUEST_PROCESSED
     else:
         raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+
+
+@app.post("/v1/token")
+async def login_for_access_token(
+    request: Request, form_data: OAuth2PasswordRequestForm = Depends()
+) -> auth.Token:
+    admin = auth.authenticate_admin(form_data.username, form_data.password)
+    if not admin:
+        raise auth.EXCEPTION_INCORRECT_USER_OR_PASS
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": admin.username}, expires_delta=access_token_expires
+    )
+    return auth.Token(access_token=access_token, token_type="bearer")
+
+
+@app.get("/admin/me", response_model=auth.Admin)
+async def read_admin_me(
+    current_admin: auth.Admin = Depends(auth.get_current_active_user),
+):
+    return current_admin
 
 
 if __name__ == "__main__":

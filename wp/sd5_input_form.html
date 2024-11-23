@@ -24,23 +24,7 @@
         <div class="area-label">面積</div>
       </div>
       <div class="record-container">
-        <select name="crop1">
-          <option value="None">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+        <select name="crop1" id="cropinput">
         </select>
         <input type="number" name="area1" placeholder="面積">
         <span class="unit">a(アール)</span>
@@ -62,28 +46,13 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="./input_corp.js"></script>
   <script>
     function addCropArea() {
       const container = document.createElement('div');
       container.className = 'record-container';
       container.innerHTML = `
-        <select name="crop">
-          <option value="None">---</option>
-          <option value="あんぽ柿">あんぽ柿</option>
-          <option value="いちご">いちご</option>
-          <option value="いんげん">いんげん</option>
-          <option value="きゅうり">きゅうり</option>
-          <option value="さくらんぼ">さくらんぼ</option>
-          <option value="さやえんどう">さやえんどう</option>
-          <option value="しいたけ">しいたけ</option>
-          <option value="春菊">春菊</option>
-          <option value="西洋なし">西洋なし</option>
-          <option value="ニラ">ニラ</option>
-          <option value="花わさび">花わさび</option>
-          <option value="ピーマン">ピーマン</option>
-          <option value="ぶどう">ぶどう</option>
-          <option value="桃">桃</option>
-          <option value="りんご">りんご</option>
+        <select name="crop" id="cropinput">
         </select>
         <input type="number" name="area" placeholder="面積">
         <span class="unit">a(アール)</span>
