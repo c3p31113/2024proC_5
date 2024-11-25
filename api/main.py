@@ -74,16 +74,16 @@ class Form(BaseModel):
 
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
-    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     detail="couldn't connect to database",
+    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 )
 EXCEPTION_BLANK_CLIENT_IP = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
     detail="somehow you are non-existance client. couldn't get your IP",
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 EXCEPTION_BLANK_QUERY = HTTPException(
     detail="query was blank",
-    status_code=status.HTTP_400_BAD_REQUEST,
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
 )
 EXCEPTION_REQUEST_INVALID = HTTPException(
     detail="request form was invalid to read. check data structure",
@@ -91,7 +91,7 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
 )
 EXCEPTION_REQUEST_FAILED_TO_PROCESS = HTTPException(
     detail="request was failed to process.",
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
@@ -317,10 +317,7 @@ async def login_for_access_token(
     admin = auth.authenticate_admin(form_data.username, form_data.password)
     if not admin:
         raise auth.EXCEPTION_INCORRECT_USER_OR_PASS
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": admin.username}, expires_delta=access_token_expires
-    )
+    access_token = auth.create_access_token(data={"sub": admin.username})
     return auth.Token(access_token=access_token, token_type="bearer")
 
 
