@@ -4,7 +4,7 @@ from json import dumps, loads
 
 from logging import getLogger
 from uvicorn import run as uvicornrun
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from pydantic.json import pydantic_encoder
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException
@@ -214,6 +214,7 @@ def get_product_category(
 @app.get("/v1/form")
 def get_form(
     id: int | None = None,
+    safemode: bool = True,
     _request=Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
@@ -231,10 +232,23 @@ def get_form(
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
-    form["product_array"] = loads(form["product_array"])
+    product_array: list[Form.Product] = []
+    try:
+        for product in loads(form["product_array"]):
+            result = Form.Product(**product)
+            product_array.append(result)
+    except ValidationError:
+        if safemode:
+            raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+        else:
+            return APIResponse(
+                message="failed to load. returning raw data",
+                body=form,
+            )
     logger.debug(form)
+    result = Form(product_array=product_array, manpower=form["manpower"])
     if form["ID"] == id:
-        return APIResponse(message="ok", body=form)
+        return APIResponse(message="ok", body=result)
     return RESPONSE_NO_MATCH_IN_DB
 
 
