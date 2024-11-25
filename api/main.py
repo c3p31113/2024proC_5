@@ -5,6 +5,7 @@ from json import dumps, loads
 from logging import getLogger
 from uvicorn import run as uvicornrun
 from pydantic import BaseModel
+from pydantic.json import pydantic_encoder
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -59,8 +60,17 @@ class Form(BaseModel):
         id: int
         amount: float
 
+        def get_information_by_one(self):
+            return get_product_from_DB(self.id)
+
     product_array: list[Product]
     manpower: int
+
+    def get_information_of_Products(self):
+        result = []
+        for product in self.product_array:
+            result.append(product.get_information_by_one())
+        return result
 
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
@@ -92,6 +102,34 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
+def get_products_from_DB() -> list[dict | None]:
+    connection = connect()
+    products = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+    )
+    connection.close()
+    if products is None:
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+    return products
+
+
+def get_product_from_DB(id: int | None) -> dict | None:
+    if id is None:
+        raise EXCEPTION_BLANK_QUERY
+    connection = connect()
+    product = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+        f"ID = {id}",
+        True,
+    )
+    connection.close()
+    return product
+
+
 def log_accessor(request: Request) -> None:
     request_path = request.scope["path"]
     if request.client is None:
@@ -117,43 +155,22 @@ def v1_root() -> APIResponse:
 
 
 @app.get("/v1/products")
-def get_products(_request=Depends(log_accessor)) -> APIResponse:
-    connection = connect()
-    products = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-    )
-    connection.close()
-    if products is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
+def get_products(
+    _request=Depends(log_accessor),
+    products=Depends(get_products_from_DB),
+) -> APIResponse:
     return APIResponse(message="ok", body=products)
 
 
 @app.get("/v1/product")
 def get_product(
     _request=Depends(log_accessor),
-    id: int | None = None,
+    product=Depends(get_product_from_DB),
 ) -> APIResponse:
-    if id is None:
-        raise EXCEPTION_BLANK_QUERY
-    connection = connect()
-    product = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-        f"ID = {id}",
-        True,
-    )
-    if product is None:
-        return RESPONSE_NO_MATCH_IN_DB
-    connection.close()
     logger.debug(product)
     if product is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-    if product["ID"] == id:
-        return APIResponse(message="ok", body=product)
-    return RESPONSE_NO_MATCH_IN_DB
+        return RESPONSE_NO_MATCH_IN_DB
+    return APIResponse(message="ok", body=product)
 
 
 @app.get("/v1/productCategories")
@@ -234,7 +251,10 @@ def post_form(
         connection,
         "form",
         ["product_array", "manpower"],
-        [f"'{dumps(form.product_array)}'", str(form.manpower)],
+        [
+            f"{dumps(form.product_array, default=pydantic_encoder).replace('"', "\\\"")}",
+            str(form.manpower),
+        ],
     )
     connection.close()
     if result:
