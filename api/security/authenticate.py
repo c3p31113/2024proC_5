@@ -31,7 +31,7 @@ def loadSecretKey(filepath: str = "config/secretKey.txt") -> str:
 
 SECRETKEY = loadSecretKey()
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1  # TODO デバッグ用数値
+ACCESS_TOKEN_EXPIRE_MINUTES = 120  # TODO デバッグ用数値
 
 EXCEPTION_INCORRECT_USER_OR_PASS = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
@@ -98,12 +98,15 @@ def get_admin(username: str) -> AdminInDB | None:
         )
 
 
-def authenticate_admin(username: str, password: str) -> AdminInDB | None:
+def authenticate_admin(
+    username: str, password: str, log_password=False
+) -> AdminInDB | None:
     admin = get_admin(username)
     if not admin:
         return None
-    logger.info(password)
-    logger.info(admin.hashed_password)
+    if log_password:
+        logger.debug(password)
+        logger.debug(admin.hashed_password)
     if not verify_password(password, admin.hashed_password):
         return None
     return admin

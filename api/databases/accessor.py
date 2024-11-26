@@ -42,7 +42,10 @@ def selectFrom(
         logger.error(f"query failed to run: {query}")
         return None
     if oneOnly:
-        result = cursor.fetchall()[0]
+        try:
+            result = cursor.fetchall()[0]
+        except IndexError:
+            return None
     else:
         result = cursor.fetchall()
     cursor.close()

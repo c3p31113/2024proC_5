@@ -54,6 +54,10 @@ class Contact(BaseModel):
     title: str
     content: str
 
+    @staticmethod
+    def from_DB(id: int) -> "Contact | None":
+        return get_contact_from_DB(id)
+
 
 class Form(BaseModel):
     class Product(BaseModel):
@@ -71,6 +75,10 @@ class Form(BaseModel):
         for product in self.product_array:
             result.append(product.get_information_by_one())
         return result
+
+    @staticmethod
+    def from_DB(id: int) -> "Form | None":
+        return get_form_from_DB(id)
 
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
@@ -128,6 +136,80 @@ def get_product_from_DB(id: int | None) -> dict | None:
     )
     connection.close()
     return product
+
+
+def get_contacts_from_DB() -> list[Contact] | None:
+    connection = connect()
+    contacts = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_CONTACTS,
+        "*",
+    )
+    connection.close()
+    if contacts is None:
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+
+    result: list[Contact] = []
+    for contact in contacts:
+        instance = Contact(**contact)
+        result.append(instance)
+    return result
+
+
+def get_contact_from_DB(id: int) -> Contact | None:
+    connection = connect()
+    contact = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_CONTACTS,
+        "*",
+        f"ID = {id}",
+        True,
+    )
+    if contact is None:
+        return None
+    connection.close()
+    instance = Contact(**contact)
+    return instance
+
+
+def get_forms_from_DB() -> list[Form] | None:
+    connection = connect()
+    forms = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_FORM,
+        "*",
+    )
+    connection.close()
+    if forms is None:
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+
+    result: list[Form] = []
+    for contact in forms:
+        instance = Form(**contact)
+        result.append(instance)
+    return result
+
+
+def get_form_from_DB(id: int) -> Form | None:
+    connection = connect()
+    form = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_FORM,
+        "*",
+        f"ID = {id}",
+        True,
+    )
+    if form is None:
+        return None
+    connection.close()
+    product_array: list[Form.Product] = []
+    try:
+        for product in loads(form["product_array"]):
+            result = Form.Product(**product)
+            product_array.append(result)
+    except ValidationError:
+        return None
+    return Form(product_array=product_array, manpower=form["manpower"])
 
 
 def log_accessor(request: Request) -> None:
@@ -214,7 +296,7 @@ def get_product_category(
 @app.get("/v1/form")
 def get_form(
     id: int | None = None,
-    safemode: bool = True,
+    form: Form = Depends(get_form_from_DB),
     detailedmode: bool = False,
     _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
@@ -222,42 +304,18 @@ def get_form(
     logger.info(f"{current_admin.username} has accessed to form specifying {id}")
     if id is None:
         raise EXCEPTION_BLANK_QUERY
-    connection = connect()
-    form = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_FORM,
-        "*",
-        f"ID = {id}",
-        True,
-    )
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
-    connection.close()
-    product_array: list[Form.Product] = []
-    try:
-        for product in loads(form["product_array"]):
-            result = Form.Product(**product)
-            product_array.append(result)
-    except ValidationError:
-        if safemode:
-            raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
-        else:
-            return APIResponse(
-                message="failed to load. returning raw data",
-                body=form,
-            )
-    logger.debug(form)
-    result = Form(product_array=product_array, manpower=form["manpower"])
     if detailedmode:
         return APIResponse(
             message="ok",
             body={
-                "product_array": result.get_information_of_Products(),
-                "manpower": result.manpower,
+                "product_array_detailed": form.get_information_of_Products(),
+                "manpower": form.manpower,
             },
         )
     else:
-        return APIResponse(message="ok", body=result)
+        return APIResponse(message="ok", body=form)
 
 
 @app.post("/v1/form")
@@ -315,6 +373,26 @@ def post_contact(
         return RESPONSE_REQUEST_PROCESSED
     else:
         raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+
+
+@app.get("/v1/contacts")
+def get_contacts(
+    contacts: list[Contact] = Depends(get_contacts_from_DB),
+    _request: None = Depends(log_accessor),
+    current_admin: auth.Admin = Depends(auth.get_current_active_user),
+) -> APIResponse:
+    return APIResponse(message="ok", body=contacts)
+
+
+@app.get("/v1/contact")
+def get_contact(
+    contact: Contact | None = Depends(Contact.from_DB),
+    _request: None = Depends(log_accessor),
+    current_admin: auth.Admin = Depends(auth.get_current_active_user),
+) -> APIResponse:
+    if contact is None:
+        return RESPONSE_NO_MATCH_IN_DB
+    return APIResponse(message="ok", body=contact)
 
 
 @app.post("/v1/token")
