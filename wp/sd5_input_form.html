@@ -52,12 +52,14 @@
       const container = document.createElement('div');
       container.className = 'record-container';
       container.innerHTML = `
-        <select name="crop" id="cropinput">
+        <select name="crop" id="1">
         </select>
         <input type="number" name="area" placeholder="面積">
         <span class="unit">a(アール)</span>
       `;
-      document.getElementById('cropForm').insertBefore(container, document.querySelector('.labor'));
+      var cropForm = document.getElementById('cropForm');
+      cropForm.getElementById("1");
+      cropForm.insertBefore(container, document.querySelector('.labor'));
     }
   </script>
 </body>

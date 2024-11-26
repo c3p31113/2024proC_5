@@ -7,8 +7,9 @@ import sqlite3
 class AgricultureSpider(scrapy.Spider):
     name = "agriculture_spider"
     start_urls = [
-        'http://example1.com/crops',  # 農業情報サイト1
-        'http://example2.com/crops',  # 農業情報サイト2
+        'https://webscraper.io/test-sites/e-commerce/allinone/product/73',  # 農業情報サイト1
+        'https://webscraper.io/test-sites/e-commerce/allinone/product/134',
+        'https://webscraper.io/test-sites/e-commerce/allinone/product/65'  # 農業情報サイト2
         # 他のサイトを追加
     ]
 
