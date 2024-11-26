@@ -1,59 +1,58 @@
-import sys
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from bs4 import BeautifulSoup
-import sqlite3
 
 class AgricultureSpider(scrapy.Spider):
-    name = "agriculture_spider"
+    name = "Agriculture_spider"
     start_urls = [
-        'https://webscraper.io/test-sites/e-commerce/allinone/product/73',  # 農業情報サイト1
-        'https://webscraper.io/test-sites/e-commerce/allinone/product/134',
-        'https://webscraper.io/test-sites/e-commerce/allinone/product/65'  # 農業情報サイト2
-        # 他のサイトを追加
+        "https://search.rakuten.co.jp/search/mall/%E8%9C%82%E5%B1%8B%E6%9F%BF%E8%8B%97/",  # rakuten
+        "https://shopping.yahoo.co.jp/search/%E5%B9%B2%E3%81%97%E6%9F%BF+%E8%9C%82%E5%B1%8B%E6%9F%BF/38289/",#yahoo
     ]
-
-    def __init__(self, crop, area, workers, *args, **kwargs):
-        super(AgricultureSpider, self).__init__(*args, **kwargs)
-        self.crop = crop
-        self.area = area
-        self.workers = workers
-
+#サイトの判別
     def parse(self, response):
-        # Beautiful Soupを使用してHTMLを解析
-        soup = BeautifulSoup(response.text, 'html.parser')
-        crops = []
-        for crop_div in soup.find_all('div', class_='crop'):
-            name = crop_div.find('h2').text
-            fertilizer = crop_div.find('span', class_='fertilizer').text
-            pesticide = crop_div.find('span', class_='pesticide').text
-            growing_season = crop_div.find('span', class_='season').text
-            price = crop_div.find('span', class_='price').text  # 価格情報を取得
-            crops.append({
-                'name': name,
-                'fertilizer': fertilizer,
-                'pesticide': pesticide,
-                'growing_season': growing_season,
-                'price': price,  # 価格情報を追加
-            })
-        self.save_to_db(crops)
+        if "rakuten" in response.url:
+            self.parse_rakuten(response)
+        elif "yahoo" in response.url:
+            self.parse_yahoo(response)
+        #elif "サイト名" in response.url:
+            #self.parse_サイト名.url:
 
-    def save_to_db(self, crops):
-        conn = sqlite3.connect('probc_sd5.db')
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS crops
-                     (name text, fertilizer text, pesticide text, growing_season text, price text)''')
-        for crop in crops:
-            c.execute("INSERT INTO crops VALUES (?, ?, ?, ?, ?)",
-                      (crop['name'], crop['fertilizer'], crop['pesticide'], crop['growing_season'], crop['price']))
-        conn.commit()
-        conn.close()
+#サイトにごとの処理の関数
+    def parse_rakuten(self, response):
+        soup = BeautifulSoup(response.text, "html.parser")
+        cards = soup.find_all("div", class_="searchresultitem")  # 楽天の検索結果カード
+
+        for card in cards:
+            product_name_tag = card.find("h2", class_="title-link-wrapper--2sUFJ title-link-wrapper-grid--db8v2")
+            product_name = product_name_tag.get_text(strip=True) if product_name_tag else "商品名不明"
+
+            product_price_tag = card.find("div", class_="price--OX_YW")
+            product_price = product_price_tag.get_text(strip=True) if product_price_tag else "価格不明"
+
+            print(f"[楽天市場] 商品名: {product_name}")
+            print(f"価格: {product_price}")
+
+    def parse_yahoo(self, response):
+        soup = BeautifulSoup(response.text, "html.parser")
+        cards = soup.find_all("li", class_="LoopList__item")  # yahooの検索結果カード
+
+        for card in cards:
+            product_name_tag = card.find("p", class_="SearchResultItemTitle_SearchResultItemTitle__itemNameRow__zMYfj")
+            product_name = product_name_tag.get_text(strip=True) if product_name_tag else "商品名不明"
+
+            product_price_tag = card.find("span", class_="SearchResultItemPrice_SearchResultItemPrice__value__G8pQV")
+            product_price = product_price_tag.get_text(strip=True) if product_price_tag else "価格不明"
+
+            print(f"[Yahoo] 商品名: {product_name}")
+            print(f"価格: {product_price}")
+            
+    #def parse_サイト名(self,response):
+        #soup = BeautifulSoup(response.text, "html.parser")
+        #以降サイトごとに書く
 
 if __name__ == "__main__":
-    crop = sys.argv[1]
-    area = sys.argv[2]
-    workers = sys.argv[3]
-
-    process = CrawlerProcess()
-    process.crawl(AgricultureSpider, crop=crop, area=area, workers=workers)
+    process = CrawlerProcess(settings={
+        "LOG_LEVEL": "ERROR",
+    })
+    process.crawl(AgricultureSpider)
     process.start()

@@ -109,7 +109,10 @@ def authenticate_admin(username: str, password: str) -> AdminInDB | None:
     return admin
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(
+    data: dict,
+    expires_delta: timedelta | None = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+):
     forencode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta

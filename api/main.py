@@ -2,9 +2,10 @@ from datetime import timedelta
 from typing import Any
 from json import dumps, loads
 
-from logging import getLogger, getLevelNamesMapping
+from logging import getLogger
 from uvicorn import run as uvicornrun
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from pydantic.json import pydantic_encoder
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -17,7 +18,6 @@ import security.authenticate as auth
 
 PORT = 3000
 RELOAD = True  # 編集しファイルを保存するたびにサーバーを自動再起動するか
-LOGLEVEL = "debug"  # "debug", "info", "warning", "error", "critical"
 
 logger = getLogger("uvicorn.app")
 app = FastAPI()
@@ -38,7 +38,6 @@ def main():
         "main:app",
         host="0.0.0.0",
         port=PORT,
-        log_level=getLevelNamesMapping()[LOGLEVEL.upper()],
         reload=RELOAD,
         log_config="config/log_config.yaml",
     )
@@ -49,17 +48,42 @@ class APIResponse(BaseModel):
     body: Any = None
 
 
+class Contact(BaseModel):
+    email_address: str
+    form_id: int | None = None
+    title: str
+    content: str
+
+
+class Form(BaseModel):
+    class Product(BaseModel):
+        id: int
+        amount: float
+
+        def get_information_by_one(self):
+            return get_product_from_DB(self.id)
+
+    product_array: list[Product]
+    manpower: int
+
+    def get_information_of_Products(self) -> list[dict]:
+        result = []
+        for product in self.product_array:
+            result.append(product.get_information_by_one())
+        return result
+
+
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
-    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     detail="couldn't connect to database",
+    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 )
 EXCEPTION_BLANK_CLIENT_IP = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
     detail="somehow you are non-existance client. couldn't get your IP",
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 EXCEPTION_BLANK_QUERY = HTTPException(
     detail="query was blank",
-    status_code=status.HTTP_400_BAD_REQUEST,
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
 )
 EXCEPTION_REQUEST_INVALID = HTTPException(
     detail="request form was invalid to read. check data structure",
@@ -67,7 +91,7 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
 )
 EXCEPTION_REQUEST_FAILED_TO_PROCESS = HTTPException(
     detail="request was failed to process.",
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
@@ -78,28 +102,7 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
-@app.get("/")
-def root(request: Request) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to root")
-    test = {
-        "valid": True,
-        "message": "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents",
-        "body": None,
-    }
-    return APIResponse(**test)
-
-
-@app.get("/v1/")
-def v1_root(request: Request) -> APIResponse:
-    return APIResponse(message="this is 2024proc sd5 API, version 1")
-
-
-@app.get("/v1/products")
-def get_products(request: Request) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
+def get_products_from_DB() -> list[dict | None]:
     connection = connect()
     products = selectFrom(
         connection,
@@ -109,14 +112,10 @@ def get_products(request: Request) -> APIResponse:
     connection.close()
     if products is None:
         raise EXCEPTION_FAILED_TO_CONNECT_DB
-    return APIResponse(message="ok", body=products)
+    return products
 
 
-@app.get("/v1/product")
-def get_product(request: Request, id: int | None = None) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to product specifying {id}")
+def get_product_from_DB(id: int | None) -> dict | None:
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -127,21 +126,55 @@ def get_product(request: Request, id: int | None = None) -> APIResponse:
         f"ID = {id}",
         True,
     )
-    if product is None:
-        return RESPONSE_NO_MATCH_IN_DB
     connection.close()
+    return product
+
+
+def log_accessor(request: Request) -> None:
+    request_path = request.scope["path"]
+    if request.client is None:
+        raise EXCEPTION_BLANK_CLIENT_IP
+    logger.debug(f"{request.client.host} has accessed to {request_path}")
+    request_params = request.scope["query_string"]
+    if request_params:
+        logger.debug(f"params were {request_params}")
+
+
+@app.get("/")
+def root(_request: None = Depends(log_accessor)) -> APIResponse:
+    test = {
+        "message": "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents",
+        "body": True,
+    }
+    return APIResponse(**test)
+
+
+@app.get("/v1/")
+def v1_root() -> APIResponse:
+    return APIResponse(message="this is 2024proc sd5 API, version 1")
+
+
+@app.get("/v1/products")
+def get_products(
+    _request: None = Depends(log_accessor),
+    products: list[dict] = Depends(get_products_from_DB),
+) -> APIResponse:
+    return APIResponse(message="ok", body=products)
+
+
+@app.get("/v1/product")
+def get_product(
+    _request: None = Depends(log_accessor),
+    product: dict = Depends(get_product_from_DB),
+) -> APIResponse:
     logger.debug(product)
     if product is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-    if product["ID"] == id:
-        return APIResponse(message="ok", body=product)
-    return RESPONSE_NO_MATCH_IN_DB
+        return RESPONSE_NO_MATCH_IN_DB
+    return APIResponse(message="ok", body=product)
 
 
 @app.get("/v1/productCategories")
-def get_product_categories(request: Request) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
+def get_product_categories(_request: None = Depends(log_accessor)) -> APIResponse:
     connection = connect()
     productCategories = selectFrom(
         connection,
@@ -155,12 +188,10 @@ def get_product_categories(request: Request) -> APIResponse:
 
 
 @app.get("/v1/productCategory")
-def get_product_category(request: Request, id: int | None = None) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(
-        f"{request.client.host} has accessed to productCategory specifying {id}"
-    )
+def get_product_category(
+    _request: None = Depends(log_accessor),
+    id: int | None = None,
+) -> APIResponse:
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -182,13 +213,12 @@ def get_product_category(request: Request, id: int | None = None) -> APIResponse
 
 @app.get("/v1/form")
 def get_form(
-    request: Request,
     id: int | None = None,
+    safemode: bool = True,
+    detailedmode: bool = False,
+    _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has accessed to form specifying {id}")
     logger.info(f"{current_admin.username} has accessed to form specifying {id}")
     if id is None:
         raise EXCEPTION_BLANK_QUERY
@@ -203,19 +233,39 @@ def get_form(
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
-    form["product_array"] = loads(form["product_array"])
+    product_array: list[Form.Product] = []
+    try:
+        for product in loads(form["product_array"]):
+            result = Form.Product(**product)
+            product_array.append(result)
+    except ValidationError:
+        if safemode:
+            raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+        else:
+            return APIResponse(
+                message="failed to load. returning raw data",
+                body=form,
+            )
     logger.debug(form)
-    if form["ID"] == id:
-        return APIResponse(message="ok", body=form)
-    return RESPONSE_NO_MATCH_IN_DB
+    result = Form(product_array=product_array, manpower=form["manpower"])
+    if detailedmode:
+        return APIResponse(
+            message="ok",
+            body={
+                "product_array": result.get_information_of_Products(),
+                "manpower": result.manpower,
+            },
+        )
+    else:
+        return APIResponse(message="ok", body=result)
 
 
 @app.post("/v1/form")
-def post_form(request: Request, form: dict = {}) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has posted to form with this query: {form}")
-    if not type(form["product_array"]) is list or not type(form["manpower"]) is int:
+def post_form(
+    form: Form,
+    _request: None = Depends(log_accessor),
+) -> APIResponse:
+    if not type(form.product_array) is list or not type(form.manpower) is int:
         raise EXCEPTION_REQUEST_INVALID
     connection = connect()
     logger.debug(form)
@@ -223,7 +273,10 @@ def post_form(request: Request, form: dict = {}) -> APIResponse:
         connection,
         "form",
         ["product_array", "manpower"],
-        [f"'{dumps(form["product_array"])}'", str(form["manpower"])],
+        [
+            f"{dumps(form.product_array, default=pydantic_encoder).replace('"', "\\\"")}",
+            str(form.manpower),
+        ],
     )
     connection.close()
     if result:
@@ -233,26 +286,27 @@ def post_form(request: Request, form: dict = {}) -> APIResponse:
 
 
 @app.post("/v1/contact")
-def post_contact(request: Request, contact: dict = {}) -> APIResponse:
-    if request.client is None:
-        raise EXCEPTION_BLANK_CLIENT_IP
-    logger.debug(f"{request.client.host} has posted to form with this query: {contact}")
+def post_contact(
+    contact: Contact,
+    _request: None = Depends(log_accessor),
+) -> APIResponse:
+    COLUMNS = [
+        "email_address",
+        "form_id",
+        "title",
+        "content",
+    ]
     # if not type(contact["email_address"] is str or not type(form["title"] ))
     connection = connect()
     result = insertInto(
         connection,
         "contacts",
+        COLUMNS,
         [
-            "email_address",
-            "form_id",
-            "title",
-            "content",
-        ],
-        [
-            contact["email_address"],
-            contact["form_id"],
-            contact["title"],
-            contact["content"],
+            contact.email_address,
+            contact.form_id,
+            contact.title,
+            contact.content,
         ],
     )
     connection.close()
@@ -265,15 +319,13 @@ def post_contact(request: Request, contact: dict = {}) -> APIResponse:
 
 @app.post("/v1/token")
 async def login_for_access_token(
-    request: Request, form_data: OAuth2PasswordRequestForm = Depends()
+    _request: None = Depends(log_accessor),
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> auth.Token:
     admin = auth.authenticate_admin(form_data.username, form_data.password)
     if not admin:
         raise auth.EXCEPTION_INCORRECT_USER_OR_PASS
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": admin.username}, expires_delta=access_token_expires
-    )
+    access_token = auth.create_access_token(data={"sub": admin.username})
     return auth.Token(access_token=access_token, token_type="bearer")
 
 
