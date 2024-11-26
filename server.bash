@@ -60,14 +60,14 @@ function main() {
         if ! IsWindowAlive $sessionname fastapi; then
             echo "fastapi window is not alive!"
             error=1
-        elif ! ProcessesOfWindow $sessionname fastapi >/dev/null; then #FIXME 下のも全部だけどコレちゃんと検知できてない
+        elif [ -z "$(ProcessesOfWindow $sessionname fastapi >/dev/null)" ]; then
             echo "fastapi isn't working!"
             error=1
         fi
         if ! IsWindowAlive $sessionname mariadb; then
             echo "mariadb window is not alive!"
             error=1
-        elif ! ProcessesOfWindow $sessionname mariadb >/dev/null; then
+        elif [ -z "$(ProcessesOfWindow $sessionname mariadb >/dev/null)" ]; then
             echo "mariadb isn't working!"
             error=1
         fi
