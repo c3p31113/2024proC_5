@@ -352,7 +352,7 @@ def post_form(
         ["product_array", "manpower"],
         [
             f"{dumps(form.product_array, default=pydantic_encoder).replace('"', "\\\"")}",
-            str(form.manpower),
+            form.manpower,
         ],
     )
     connection.close()
@@ -426,7 +426,7 @@ async def login_for_access_token(
     return auth.Token(access_token=access_token, token_type="bearer")
 
 
-@app.get("/admin/me", response_model=auth.Admin)
+@app.get("/v1/admin/me", response_model=auth.Admin)
 async def read_admin_me(
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
