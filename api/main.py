@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any
 from json import dumps, loads
 
@@ -58,8 +57,35 @@ class Product(BaseModel):
     yen_per_1a: int
 
     @staticmethod
-    def from_DB(id: int) -> "Product | None":
-        return get_product_from_DB(id)
+    def all_from_DB() -> "list[Product]":
+        connection = connect()
+        products = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_PRODUCTS,
+            "*",
+        )
+        connection.close()
+        if products is None:
+            raise EXCEPTION_FAILED_TO_CONNECT_DB
+        result: list[Product] = []
+        for product in products:
+            result.append(Product(**product))
+        return products
+
+    @staticmethod
+    def one_from_DB(id: int) -> "Product | None":
+        if id is None:
+            raise EXCEPTION_BLANK_QUERY
+        connection = connect()
+        product = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_PRODUCTS,
+            "*",
+            f"ID = {id}",
+            True,
+        )
+        connection.close()
+        return Product(**product)
 
 
 class Contact(BaseModel):
@@ -70,8 +96,38 @@ class Contact(BaseModel):
     content: str
 
     @staticmethod
-    def from_DB(id: int) -> "Contact | None":
-        return get_contact_from_DB(id)
+    def all_from_DB() -> "list[Contact]":
+        connection = connect()
+        contacts = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_CONTACTS,
+            "*",
+        )
+        connection.close()
+        if contacts is None:
+            raise EXCEPTION_FAILED_TO_CONNECT_DB
+
+        result: list[Contact] = []
+        for contact in contacts:
+            instance = Contact(**contact)
+            result.append(instance)
+        return result
+
+    @staticmethod
+    def one_from_DB(id: int) -> "Contact | None":
+        connection = connect()
+        contact = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_CONTACTS,
+            "*",
+            f"ID = {id}",
+            True,
+        )
+        if contact is None:
+            return None
+        connection.close()
+        instance = Contact(**contact)
+        return instance
 
 
 class Form(BaseModel):
@@ -79,22 +135,60 @@ class Form(BaseModel):
         id: int
         amount: float
 
-        def get_information_by_one(self):
-            return get_product_from_DB(self.id)
+        def get_information_by_one(self) -> Product | None:
+            return Product.one_from_DB(self.id)
 
     id: int
     product_array: list[ProductInForm]
     manpower: int
 
-    def get_information_of_Products(self) -> list[Product]:
+    def get_information_of_Products(self) -> list[Product | None]:
         result = []
         for product in self.product_array:
             result.append(product.get_information_by_one())
         return result
 
     @staticmethod
-    def from_DB(id: int) -> "Form | None":
-        return get_form_from_DB(id)
+    def all_from_DB() -> "list[Form]":
+        connection = connect()
+        forms = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_FORM,
+            "*",
+        )
+        connection.close()
+        if forms is None:
+            raise EXCEPTION_FAILED_TO_CONNECT_DB
+
+        result: list[Form] = []
+        for contact in forms:
+            instance = Form(**contact)
+            result.append(instance)
+        return result
+
+    @staticmethod
+    def one_from_DB(id: int) -> "Form | None":
+        connection = connect()
+        form = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_FORM,
+            "*",
+            f"ID = {id}",
+            True,
+        )
+        if form is None:
+            return None
+        connection.close()
+        product_array: list[Form.ProductInForm] = []
+        try:
+            for product in loads(form["product_array"]):
+                result = Form.ProductInForm(**product)
+                product_array.append(result)
+        except ValidationError:
+            return None
+        return Form(
+            id=form["ID"], product_array=product_array, manpower=form["manpower"]
+        )
 
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
@@ -126,111 +220,6 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
-def get_products_from_DB() -> list[Product]:
-    connection = connect()
-    products = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-    )
-    connection.close()
-    if products is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-    result: list[Product] = []
-    for product in products:
-        result.append(Product(**product))
-    return products
-
-
-def get_product_from_DB(id: int | None) -> Product | None:
-    if id is None:
-        raise EXCEPTION_BLANK_QUERY
-    connection = connect()
-    product = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-        f"ID = {id}",
-        True,
-    )
-    connection.close()
-    return Product(**product)
-
-
-def get_contacts_from_DB() -> list[Contact] | None:
-    connection = connect()
-    contacts = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_CONTACTS,
-        "*",
-    )
-    connection.close()
-    if contacts is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-
-    result: list[Contact] = []
-    for contact in contacts:
-        instance = Contact(**contact)
-        result.append(instance)
-    return result
-
-
-def get_contact_from_DB(id: int) -> Contact | None:
-    connection = connect()
-    contact = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_CONTACTS,
-        "*",
-        f"ID = {id}",
-        True,
-    )
-    if contact is None:
-        return None
-    connection.close()
-    instance = Contact(**contact)
-    return instance
-
-
-def get_forms_from_DB() -> list[Form] | None:
-    connection = connect()
-    forms = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_FORM,
-        "*",
-    )
-    connection.close()
-    if forms is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-
-    result: list[Form] = []
-    for contact in forms:
-        instance = Form(**contact)
-        result.append(instance)
-    return result
-
-
-def get_form_from_DB(id: int) -> Form | None:
-    connection = connect()
-    form = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_FORM,
-        "*",
-        f"ID = {id}",
-        True,
-    )
-    if form is None:
-        return None
-    connection.close()
-    product_array: list[Form.ProductInForm] = []
-    try:
-        for product in loads(form["product_array"]):
-            result = Form.ProductInForm(**product)
-            product_array.append(result)
-    except ValidationError:
-        return None
-    return Form(id=form["ID"], product_array=product_array, manpower=form["manpower"])
-
-
 def log_accessor(request: Request) -> None:
     request_path = request.scope["path"]
     if request.client is None:
@@ -258,7 +247,7 @@ def v1_root() -> APIResponse:
 @app.get("/v1/products")
 def get_products(
     _request: None = Depends(log_accessor),
-    products: list[Product] = Depends(get_products_from_DB),
+    products: list[Product] = Depends(Product.all_from_DB),
 ) -> APIResponse:
     return APIResponse(message="ok", body=products)
 
@@ -266,7 +255,7 @@ def get_products(
 @app.get("/v1/product")
 def get_product(
     _request: None = Depends(log_accessor),
-    product: Product = Depends(get_product_from_DB),
+    product: Product = Depends(Product.one_from_DB),
 ) -> APIResponse:
     logger.debug(product)
     if product is None:
@@ -315,7 +304,7 @@ def get_product_category(
 @app.get("/v1/form")
 def get_form(
     id: int | None = None,
-    form: Form = Depends(get_form_from_DB),
+    form: Form = Depends(Form.one_from_DB),
     detailedmode: bool = False,
     _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
@@ -329,6 +318,7 @@ def get_form(
         return APIResponse(
             message="ok",
             body={
+                "id": form.id,
                 "product_array_detailed": form.get_information_of_Products(),
                 "manpower": form.manpower,
             },
@@ -367,18 +357,16 @@ def post_contact(
     contact: Contact,
     _request: None = Depends(log_accessor),
 ) -> APIResponse:
-    COLUMNS = [
-        "email_address",
-        "form_id",
-        "title",
-        "content",
-    ]
-    # if not type(contact["email_address"] is str or not type(form["title"] ))
     connection = connect()
     result = insertInto(
         connection,
         "contacts",
-        COLUMNS,
+        [
+            "email_address",
+            "form_id",
+            "title",
+            "content",
+        ],
         [
             contact.email_address,
             contact.form_id,
@@ -396,7 +384,7 @@ def post_contact(
 
 @app.get("/v1/contacts")
 def get_contacts(
-    contacts: list[Contact] = Depends(get_contacts_from_DB),
+    contacts: list[Contact] = Depends(Contact.all_from_DB),
     _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
@@ -405,7 +393,7 @@ def get_contacts(
 
 @app.get("/v1/contact")
 def get_contact(
-    contact: Contact | None = Depends(Contact.from_DB),
+    contact: Contact | None = Depends(Contact.one_from_DB),
     _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
