@@ -48,7 +48,22 @@ class APIResponse(BaseModel):
     body: Any = None
 
 
+class Product(BaseModel):
+    ID: int
+    name: str
+    summary: str | None
+    desc: str | None
+    product_categories_ID: int
+    yen_per_kg: int
+    yen_per_1a: int
+
+    @staticmethod
+    def from_DB(id: int) -> "Product | None":
+        return get_product_from_DB(id)
+
+
 class Contact(BaseModel):
+    ID: int
     email_address: str
     form_id: int | None = None
     title: str
@@ -60,17 +75,18 @@ class Contact(BaseModel):
 
 
 class Form(BaseModel):
-    class Product(BaseModel):
+    class ProductInForm(BaseModel):
         id: int
         amount: float
 
         def get_information_by_one(self):
             return get_product_from_DB(self.id)
 
-    product_array: list[Product]
+    id: int
+    product_array: list[ProductInForm]
     manpower: int
 
-    def get_information_of_Products(self) -> list[dict]:
+    def get_information_of_Products(self) -> list[Product]:
         result = []
         for product in self.product_array:
             result.append(product.get_information_by_one())
@@ -110,7 +126,7 @@ RESPONSE_NO_MATCH_IN_DB = APIResponse(
 )
 
 
-def get_products_from_DB() -> list[dict | None]:
+def get_products_from_DB() -> list[Product]:
     connection = connect()
     products = selectFrom(
         connection,
@@ -120,10 +136,13 @@ def get_products_from_DB() -> list[dict | None]:
     connection.close()
     if products is None:
         raise EXCEPTION_FAILED_TO_CONNECT_DB
+    result: list[Product] = []
+    for product in products:
+        result.append(Product(**product))
     return products
 
 
-def get_product_from_DB(id: int | None) -> dict | None:
+def get_product_from_DB(id: int | None) -> Product | None:
     if id is None:
         raise EXCEPTION_BLANK_QUERY
     connection = connect()
@@ -135,7 +154,7 @@ def get_product_from_DB(id: int | None) -> dict | None:
         True,
     )
     connection.close()
-    return product
+    return Product(**product)
 
 
 def get_contacts_from_DB() -> list[Contact] | None:
@@ -202,14 +221,14 @@ def get_form_from_DB(id: int) -> Form | None:
     if form is None:
         return None
     connection.close()
-    product_array: list[Form.Product] = []
+    product_array: list[Form.ProductInForm] = []
     try:
         for product in loads(form["product_array"]):
-            result = Form.Product(**product)
+            result = Form.ProductInForm(**product)
             product_array.append(result)
     except ValidationError:
         return None
-    return Form(product_array=product_array, manpower=form["manpower"])
+    return Form(id=form["ID"], product_array=product_array, manpower=form["manpower"])
 
 
 def log_accessor(request: Request) -> None:
@@ -239,7 +258,7 @@ def v1_root() -> APIResponse:
 @app.get("/v1/products")
 def get_products(
     _request: None = Depends(log_accessor),
-    products: list[dict] = Depends(get_products_from_DB),
+    products: list[Product] = Depends(get_products_from_DB),
 ) -> APIResponse:
     return APIResponse(message="ok", body=products)
 
@@ -247,7 +266,7 @@ def get_products(
 @app.get("/v1/product")
 def get_product(
     _request: None = Depends(log_accessor),
-    product: dict = Depends(get_product_from_DB),
+    product: Product = Depends(get_product_from_DB),
 ) -> APIResponse:
     logger.debug(product)
     if product is None:
