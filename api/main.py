@@ -70,7 +70,7 @@ class Product(BaseModel):
         result: list[Product] = []
         for product in products:
             result.append(Product(**product))
-        return products
+        return result
 
     @staticmethod
     def one_from_DB(id: int) -> "Product | None":
@@ -126,8 +126,7 @@ class Contact(BaseModel):
         if contact is None:
             return None
         connection.close()
-        instance = Contact(**contact)
-        return instance
+        return Contact(**contact)
 
 
 class Form(BaseModel):
@@ -135,17 +134,17 @@ class Form(BaseModel):
         id: int
         amount: float
 
-        def get_information_by_one(self) -> Product | None:
+        def get_product(self) -> Product | None:
             return Product.one_from_DB(self.id)
 
     id: int
     product_array: list[ProductInForm]
     manpower: int
 
-    def get_information_of_Products(self) -> list[Product | None]:
+    def get_Products(self) -> list[Product | None]:
         result = []
         for product in self.product_array:
-            result.append(product.get_information_by_one())
+            result.append(product.get_product())
         return result
 
     @staticmethod
@@ -319,7 +318,7 @@ def get_form(
             message="ok",
             body={
                 "id": form.id,
-                "product_array_detailed": form.get_information_of_Products(),
+                "product_array_detailed": form.get_Products(),
                 "manpower": form.manpower,
             },
         )
