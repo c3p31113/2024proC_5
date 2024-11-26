@@ -4,7 +4,8 @@ from json import dumps, loads
 
 from logging import getLogger
 from uvicorn import run as uvicornrun
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from pydantic.json import pydantic_encoder
 
 from fastapi import FastAPI, status, Request, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -59,21 +60,30 @@ class Form(BaseModel):
         id: int
         amount: float
 
+        def get_information_by_one(self):
+            return get_product_from_DB(self.id)
+
     product_array: list[Product]
     manpower: int
 
+    def get_information_of_Products(self):
+        result = []
+        for product in self.product_array:
+            result.append(product.get_information_by_one())
+        return result
+
 
 EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
-    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     detail="couldn't connect to database",
+    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
 )
 EXCEPTION_BLANK_CLIENT_IP = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
     detail="somehow you are non-existance client. couldn't get your IP",
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 EXCEPTION_BLANK_QUERY = HTTPException(
     detail="query was blank",
-    status_code=status.HTTP_400_BAD_REQUEST,
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
 )
 EXCEPTION_REQUEST_INVALID = HTTPException(
     detail="request form was invalid to read. check data structure",
@@ -81,7 +91,7 @@ EXCEPTION_REQUEST_INVALID = HTTPException(
 )
 EXCEPTION_REQUEST_FAILED_TO_PROCESS = HTTPException(
     detail="request was failed to process.",
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    status_code=status.HTTP_400_BAD_REQUEST,
 )
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
@@ -90,6 +100,34 @@ RESPONSE_REQUEST_PROCESSED = APIResponse(
 RESPONSE_NO_MATCH_IN_DB = APIResponse(
     message="specified id wasn't found in the table", body=False
 )
+
+
+def get_products_from_DB() -> list[dict | None]:
+    connection = connect()
+    products = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+    )
+    connection.close()
+    if products is None:
+        raise EXCEPTION_FAILED_TO_CONNECT_DB
+    return products
+
+
+def get_product_from_DB(id: int | None) -> dict | None:
+    if id is None:
+        raise EXCEPTION_BLANK_QUERY
+    connection = connect()
+    product = selectFrom(
+        connection,
+        databaseliterals.DATABASE_TABLE_PRODUCTS,
+        "*",
+        f"ID = {id}",
+        True,
+    )
+    connection.close()
+    return product
 
 
 def log_accessor(request: Request) -> None:
@@ -117,43 +155,22 @@ def v1_root() -> APIResponse:
 
 
 @app.get("/v1/products")
-def get_products(_request=Depends(log_accessor)) -> APIResponse:
-    connection = connect()
-    products = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-    )
-    connection.close()
-    if products is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
+def get_products(
+    _request=Depends(log_accessor),
+    products=Depends(get_products_from_DB),
+) -> APIResponse:
     return APIResponse(message="ok", body=products)
 
 
 @app.get("/v1/product")
 def get_product(
     _request=Depends(log_accessor),
-    id: int | None = None,
+    product=Depends(get_product_from_DB),
 ) -> APIResponse:
-    if id is None:
-        raise EXCEPTION_BLANK_QUERY
-    connection = connect()
-    product = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTS,
-        "*",
-        f"ID = {id}",
-        True,
-    )
-    if product is None:
-        return RESPONSE_NO_MATCH_IN_DB
-    connection.close()
     logger.debug(product)
     if product is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
-    if product["ID"] == id:
-        return APIResponse(message="ok", body=product)
-    return RESPONSE_NO_MATCH_IN_DB
+        return RESPONSE_NO_MATCH_IN_DB
+    return APIResponse(message="ok", body=product)
 
 
 @app.get("/v1/productCategories")
@@ -197,6 +214,7 @@ def get_product_category(
 @app.get("/v1/form")
 def get_form(
     id: int | None = None,
+    safemode: bool = True,
     _request=Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
@@ -214,10 +232,23 @@ def get_form(
     if form is None:
         return RESPONSE_NO_MATCH_IN_DB
     connection.close()
-    form["product_array"] = loads(form["product_array"])
+    product_array: list[Form.Product] = []
+    try:
+        for product in loads(form["product_array"]):
+            result = Form.Product(**product)
+            product_array.append(result)
+    except ValidationError:
+        if safemode:
+            raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+        else:
+            return APIResponse(
+                message="failed to load. returning raw data",
+                body=form,
+            )
     logger.debug(form)
+    result = Form(product_array=product_array, manpower=form["manpower"])
     if form["ID"] == id:
-        return APIResponse(message="ok", body=form)
+        return APIResponse(message="ok", body=result)
     return RESPONSE_NO_MATCH_IN_DB
 
 
@@ -234,7 +265,10 @@ def post_form(
         connection,
         "form",
         ["product_array", "manpower"],
-        [f"'{dumps(form.product_array)}'", str(form.manpower)],
+        [
+            f"{dumps(form.product_array, default=pydantic_encoder).replace('"', "\\\"")}",
+            str(form.manpower),
+        ],
     )
     connection.close()
     if result:
@@ -283,10 +317,7 @@ async def login_for_access_token(
     admin = auth.authenticate_admin(form_data.username, form_data.password)
     if not admin:
         raise auth.EXCEPTION_INCORRECT_USER_OR_PASS
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": admin.username}, expires_delta=access_token_expires
-    )
+    access_token = auth.create_access_token(data={"sub": admin.username})
     return auth.Token(access_token=access_token, token_type="bearer")
 
 
