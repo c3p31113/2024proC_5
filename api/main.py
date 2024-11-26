@@ -66,7 +66,7 @@ class Form(BaseModel):
     product_array: list[Product]
     manpower: int
 
-    def get_information_of_Products(self):
+    def get_information_of_Products(self) -> list[dict]:
         result = []
         for product in self.product_array:
             result.append(product.get_information_by_one())
@@ -141,7 +141,7 @@ def log_accessor(request: Request) -> None:
 
 
 @app.get("/")
-def root(_request=Depends(log_accessor)) -> APIResponse:
+def root(_request: None = Depends(log_accessor)) -> APIResponse:
     test = {
         "message": "this is 2024proc sd5 API powered by fastAPI. check /docs page for documents",
         "body": True,
@@ -156,16 +156,16 @@ def v1_root() -> APIResponse:
 
 @app.get("/v1/products")
 def get_products(
-    _request=Depends(log_accessor),
-    products=Depends(get_products_from_DB),
+    _request: None = Depends(log_accessor),
+    products: list[dict] = Depends(get_products_from_DB),
 ) -> APIResponse:
     return APIResponse(message="ok", body=products)
 
 
 @app.get("/v1/product")
 def get_product(
-    _request=Depends(log_accessor),
-    product=Depends(get_product_from_DB),
+    _request: None = Depends(log_accessor),
+    product: dict = Depends(get_product_from_DB),
 ) -> APIResponse:
     logger.debug(product)
     if product is None:
@@ -174,7 +174,7 @@ def get_product(
 
 
 @app.get("/v1/productCategories")
-def get_product_categories(_request=Depends(log_accessor)) -> APIResponse:
+def get_product_categories(_request: None = Depends(log_accessor)) -> APIResponse:
     connection = connect()
     productCategories = selectFrom(
         connection,
@@ -189,7 +189,7 @@ def get_product_categories(_request=Depends(log_accessor)) -> APIResponse:
 
 @app.get("/v1/productCategory")
 def get_product_category(
-    _request=Depends(log_accessor),
+    _request: None = Depends(log_accessor),
     id: int | None = None,
 ) -> APIResponse:
     if id is None:
@@ -215,7 +215,8 @@ def get_product_category(
 def get_form(
     id: int | None = None,
     safemode: bool = True,
-    _request=Depends(log_accessor),
+    detailedmode: bool = False,
+    _request: None = Depends(log_accessor),
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ) -> APIResponse:
     logger.info(f"{current_admin.username} has accessed to form specifying {id}")
@@ -247,15 +248,22 @@ def get_form(
             )
     logger.debug(form)
     result = Form(product_array=product_array, manpower=form["manpower"])
-    if form["ID"] == id:
+    if detailedmode:
+        return APIResponse(
+            message="ok",
+            body={
+                "product_array": result.get_information_of_Products(),
+                "manpower": result.manpower,
+            },
+        )
+    else:
         return APIResponse(message="ok", body=result)
-    return RESPONSE_NO_MATCH_IN_DB
 
 
 @app.post("/v1/form")
 def post_form(
     form: Form,
-    _request=Depends(log_accessor),
+    _request: None = Depends(log_accessor),
 ) -> APIResponse:
     if not type(form.product_array) is list or not type(form.manpower) is int:
         raise EXCEPTION_REQUEST_INVALID
@@ -280,7 +288,7 @@ def post_form(
 @app.post("/v1/contact")
 def post_contact(
     contact: Contact,
-    _request=Depends(log_accessor),
+    _request: None = Depends(log_accessor),
 ) -> APIResponse:
     COLUMNS = [
         "email_address",
@@ -311,7 +319,7 @@ def post_contact(
 
 @app.post("/v1/token")
 async def login_for_access_token(
-    _request=Depends(log_accessor),
+    _request: None = Depends(log_accessor),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> auth.Token:
     admin = auth.authenticate_admin(form_data.username, form_data.password)
