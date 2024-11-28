@@ -251,7 +251,7 @@ def get_products(
     return APIResponse(message="ok", body=products)
 
 
-@app.get("/v1/product")
+@app.get("/v1/products/{id}")
 def get_product(
     _request: None = Depends(log_accessor),
     product: Product = Depends(Product.one_from_DB),
@@ -276,7 +276,7 @@ def get_product_categories(_request: None = Depends(log_accessor)) -> APIRespons
     return APIResponse(message="ok", body=productCategories)
 
 
-@app.get("/v1/productCategory")
+@app.get("/v1/productCategories/{id}")
 def get_product_category(
     _request: None = Depends(log_accessor),
     id: int | None = None,
@@ -300,7 +300,7 @@ def get_product_category(
     return RESPONSE_NO_MATCH_IN_DB
 
 
-@app.get("/v1/form")
+@app.get("/v1/forms/{id}")
 def get_form(
     id: int | None = None,
     form: Form = Depends(Form.one_from_DB),
@@ -326,7 +326,7 @@ def get_form(
         return APIResponse(message="ok", body=form)
 
 
-@app.post("/v1/form")
+@app.post("/v1/forms", status_code=status.HTTP_201_CREATED)
 def post_form(
     form: Form,
     _request: None = Depends(log_accessor),
@@ -351,7 +351,7 @@ def post_form(
         raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
 
 
-@app.post("/v1/contact")
+@app.post("/v1/contacts", status_code=status.HTTP_201_CREATED)
 def post_contact(
     contact: Contact,
     _request: None = Depends(log_accessor),
@@ -390,7 +390,7 @@ def get_contacts(
     return APIResponse(message="ok", body=contacts)
 
 
-@app.get("/v1/contact")
+@app.get("/v1/contacts/{id}")
 def get_contact(
     contact: Contact | None = Depends(Contact.one_from_DB),
     _request: None = Depends(log_accessor),
