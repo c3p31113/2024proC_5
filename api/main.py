@@ -88,6 +88,43 @@ class Product(BaseModel):
         return Product(**product)
 
 
+class ProductCategory(BaseModel):
+    ID: int
+    name: str
+    summary: str | None
+
+    @staticmethod
+    def all_from_DB() -> "list[ProductCategory]":
+        connection = connect()
+        product_categories = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+            "*",
+        )
+        connection.close()
+        if product_categories is None:
+            raise EXCEPTION_FAILED_TO_CONNECT_DB
+        result: list[ProductCategory] = []
+        for product_category in product_categories:
+            result.append(ProductCategory(**product_category))
+        return result
+
+    @staticmethod
+    def one_from_DB(id: int) -> "ProductCategory | None":
+        if id is None:
+            raise EXCEPTION_BLANK_QUERY
+        connection = connect()
+        productCategory = selectFrom(
+            connection,
+            databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
+            "*",
+            f"ID = {id}",
+            True,
+        )
+        connection.close()
+        return ProductCategory(**productCategory)
+
+
 class Contact(BaseModel):
     ID: int
     email_address: str
@@ -263,41 +300,27 @@ def get_product(
 
 
 @app.get("/v1/productCategories")
-def get_product_categories(_request: None = Depends(log_accessor)) -> APIResponse:
-    connection = connect()
-    productCategories = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-        "*",
-    )
-    connection.close()
+def get_product_categories(
+    _request: None = Depends(log_accessor),
+    productCategories: list[ProductCategory] = Depends(ProductCategory.all_from_DB),
+) -> APIResponse:
     if productCategories is None:
-        raise EXCEPTION_FAILED_TO_CONNECT_DB
+        return RESPONSE_NO_MATCH_IN_DB
     return APIResponse(message="ok", body=productCategories)
 
 
 @app.get("/v1/productCategories/{id}")
 def get_product_category(
-    _request: None = Depends(log_accessor),
     id: int | None = None,
+    _request: None = Depends(log_accessor),
+    productCategory: ProductCategory = Depends(ProductCategory.one_from_DB),
 ) -> APIResponse:
+    logger.debug(productCategory)
     if id is None:
         raise EXCEPTION_BLANK_QUERY
-    connection = connect()
-    productCategory = selectFrom(
-        connection,
-        databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-        "*",
-        f"ID = {id}",
-        True,
-    )
     if productCategory is None:
         return RESPONSE_NO_MATCH_IN_DB
-    connection.close()
-    logger.info(productCategory)
-    if productCategory["ID"] == id:
-        return APIResponse(message="ok", body=productCategory)
-    return RESPONSE_NO_MATCH_IN_DB
+    return APIResponse(message="ok", body=productCategory)
 
 
 @app.get("/v1/forms/{id}")
