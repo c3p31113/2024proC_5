@@ -20,3 +20,4 @@ __pycache__
 phpMyAdmin**
 
 config/*
+!config/log_config.yaml
