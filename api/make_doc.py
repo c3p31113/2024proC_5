@@ -42,6 +42,7 @@ def table_replace(old_text: str, new_text: str):
     return
 
 
+
 # print("段落の個数:", len(doc.paragraphs))
 
 print("表の個数:", len(doc.tables))
@@ -61,6 +62,7 @@ replace(3, "dd", str(dt_now.day))
 # 行を挿入して文字を入力する例（５行目に新たな行を挿入し、データを入力する）
 # para = doc.paragraphs[5]
 # para.insert_paragraph_before("申請者住所　伊達市〇〇町１２３－４")
+
 # doc.paragraphs[5].alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
 
@@ -74,6 +76,70 @@ replace(3, "dd", str(dt_now.day))
 #     # print(row_text)
 #     print("".join(row_text).replace("\u3000", "_"))
 
+
+# 計算式@マークの部分はDBから受け取る
+# 生産量 = @経営規模(広さ) * @単位規模当たりの生産量
+
+# 農業粗収益 = 生産量 * @単価
+
+# 農業所得 = 農業粗収益 - @農業経営費
+
+new_text_list1 = ["ジャガイモ","10a", "1000kg"]
+new_text_list2 = []
+new_text_list3 = []
+new_text_list4 = []
+new_text_list5 = []
+new_text_list6 = []
+new_text_list7 = []
+new_text_list8 = []
+
+replace_List1=["作物１","面積１","生産量１"]
+replace_List2=["作物２","面積２","生産量２"]
+replace_List3=["作物３","面積３","生産量３"]
+replace_List4=["作物４","面積４","生産量４"]
+replace_List5=["作物５","面積５","生産量５"]
+replace_List6=["作物６","面積６","生産量６"]
+replace_List7=["作物７","面積７","生産量７"]
+replace_List8=["作物８","面積８","生産量８"]
+
+for i in range(len(replace_List1)):
+    table_replace( replace_List1[i],str(new_text_list1[i]))
+    print(table_replace)
+
+for i in range(len(replace_List2)):
+    table_replace( replace_List2[i],str(new_text_list2[i]))
+    print(table_replace)
+
+for i in range(len(replace_List3)):
+    table_replace( replace_List3[i],str(new_text_list3[i]))
+    print(table_replace)
+
+for i in range(len(replace_List4)):
+    table_replace( replace_List4[i],str(new_text_list4[i]))
+    print(table_replace)
+
+for i in range(len(replace_List5)):
+    table_replace( replace_List5[i],str(new_text_list5[i]))
+    print(table_replace)
+
+for i in range(len(replace_List6)):
+    table_replace( replace_List6[i],str(new_text_list6[i]))
+    print(table_replace)
+
+for i in range(len(replace_List7)):
+    table_replace( replace_List7[i],str(new_text_list7[i]))
+    print(table_replace)
+
+for i in range(len(replace_List8)):
+    table_replace( replace_List8[i],str(new_text_list8[i]))
+    print(table_replace)
+
+
+
+
+
+#農業粗収益
+table_replace("農業粗収益の計算", str())
 makedirs("tmp/", exist_ok=True)
 
 # 別名保存
