@@ -1,6 +1,7 @@
 from docx import Document
 from docx.document import Document as DocumentObject
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+import datetime
 from os import makedirs
 
 
@@ -52,40 +53,18 @@ print("表の個数:", len(doc.tables))
 #     print(num, para.text)
 
 # 日付編集
-replace(3, "yyyy", "2021")
-replace(3, "mm", "6")
-replace(3, "dd", "04")
+dt_now = datetime.datetime.now()
+replace(3, "yyyy", str(dt_now.year))
+replace(3, "mm", str(dt_now.month))
+replace(3, "dd", str(dt_now.day))
 
-# 住所追加
-para = doc.paragraphs[5]
-para.insert_paragraph_before("申請者住所　伊達市〇〇町１２３－４")
-# 右揃えがしたかったができなかった↓
-doc.paragraphs[5].alignment = WD_ALIGN_PARAGRAPH.RIGHT
-# 名前
-replace(7, "姓名", "文教太郎")
+# 行を挿入して文字を入力する例（５行目に新たな行を挿入し、データを入力する）
+# para = doc.paragraphs[5]
+# para.insert_paragraph_before("申請者住所　伊達市〇〇町１２３－４")
+# doc.paragraphs[5].alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
-# 誕生日年齢
-replace(8, "yyyy", "2004")
-replace(8, "mm", "10")
-replace(8, "dd", "15")
-replace(8, "age", "20")
-
-# 法人設立年月日
-replace(9, "yyyy", "2024")
-replace(9, "mm", "4")
-replace(9, "dd", "1")
-
-# 農業経営開始
-replace(9, "yyyy", "2024")
-replace(9, "mm", "4")
-replace(9, "dd", "1")
 
 # ここから下は表
-
-# 農業経営開始日
-table_replace("yyyy", "2026")
-table_replace("mm", "4")
-table_replace("dd", "1")
 
 # tbl = doc.tables[0]
 # for row in tbl.rows:
