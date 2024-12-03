@@ -39,7 +39,7 @@ export async function getProductCategories() {
  * @returns {Promise<ProductCategory>}
  */
 export async function getProductCategory(id = 0) {
-    return (await get(`/v1/productCategories?${id}`)).json()
+    return (await get(`/v1/productCategories/${id}`)).json()
 }
 
 /**
@@ -49,7 +49,7 @@ export async function postForm(form) {
     if (typeof (form.manpower) != "number" || typeof (form.product_array) != "object") {
         console.error({ "message": "wrong form format", "form": form });
     }
-    post(form)
+    post(form, "/v1/forms")
 }
 
 /**
@@ -59,14 +59,14 @@ export async function postContact(contact) {
     if (typeof (contact.email_address) != "string" || typeof (contact.title) != "string" || typeof (contact.content) != "string") {
         console.error({ "message": "wrong form format", "form": contact });
     }
-    post(contact)
+    post(contact, "/v1/contacts")
 }
 
 function getAPIhost() {
     return `http://${window.location.hostname}:3000`;
 }
 
-async function get(path = getAPIhost()) {
+async function get(path = "/") {
     return await fetch(getAPIhost() + path, {
         method: "GET",
         headers: {
