@@ -1,5 +1,6 @@
 from typing import Any
-from json import dumps, loads
+from json import dumps, loads, load
+from os import system as shell
 
 from logging import getLogger
 from uvicorn import run as uvicornrun
@@ -11,7 +12,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
 from databases import literals as databaseliterals
-from databases.accessor import connect, selectFrom, insertInto
+from databases.accessor import connect, selectFrom, insertInto, update
 import security.authenticate as auth
 
 
@@ -54,7 +55,7 @@ class Product(BaseModel):
     desc: str | None
     product_categories_ID: int
     yen_per_kg: int
-    yen_per_1a: int
+    kg_per1a: int
 
     @staticmethod
     def all_from_DB() -> "list[Product]":
@@ -441,6 +442,26 @@ async def read_admin_me(
     current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
     return current_admin
+
+
+@app.get("/v1/update_price")
+async def update_price(
+    # current_admin: auth.Admin = Depends(auth.get_current_active_user),
+):
+    FILENAME = "./tmp/test.json"
+    shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
+    logger.info("scraped.")
+    with open(FILENAME, mode="r") as file:
+        scraped_data: list[dict] = load(file)
+    for product in scraped_data:
+        update(
+            connection=connect(),
+            table=databaseliterals.DATABASE_TABLE_PRODUCTS,
+            column="yen_per_kg",
+            value=product["price"],
+            where=f"id={product["id"]}",
+        )
+    return APIResponse(message="ok", body=scraped_data)
 
 
 if __name__ == "__main__":

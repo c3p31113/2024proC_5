@@ -97,7 +97,8 @@ def update(
     cursor = connection.cursor(dictionary=True)
     query = f"UPDATE {table} SET {column} = {value}"
     if where != "":
-        query = f"{query} WHERE {where}"
+        query += f" WHERE {where}"
+    logger.debug(query)
     try:
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
