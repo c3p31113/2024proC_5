@@ -34,12 +34,12 @@ class AgricultureSpider(scrapy.Spider):
         {
             "id": "strawberry",
             "url": "https://shop.takii.co.jp/category/00006212",
-            "category": "いちご"
+            "category": "いちご",
         },
         {
             "id": "fertilizer_1",
             "url": "https://shop.takii.co.jp/category/00010115",
-            "category": "いちご-肥料"
+            "category": "いちご-肥料",
         },
         # インゲン
         {
@@ -69,9 +69,9 @@ class AgricultureSpider(scrapy.Spider):
             "category": "きゅうり",
         },
         {
-            "id":"cucumber_f",
-            "url":"https://shop.takii.co.jp/product/catalog/kw/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A%E3%81%AE%E8%82%A5%E6%96%99",
-            "category":"きゅうり-肥料"
+            "id": "cucumber_f",
+            "url": "https://shop.takii.co.jp/product/catalog/kw/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A%E3%81%AE%E8%82%A5%E6%96%99",
+            "category": "きゅうり-肥料",
         },
         {
             "id": "cucumber_f",
@@ -85,9 +85,9 @@ class AgricultureSpider(scrapy.Spider):
             "category": "さやえんどう",
         },
         {
-            "id":"Snowpeas",
-            "url":"https://shop.takii.co.jp/product/catalog/s/default/n/25/t/category/ca/00003435/es/1#a1",
-            "category":"さやえんどう"
+            "id": "Snowpeas",
+            "url": "https://shop.takii.co.jp/product/catalog/s/default/n/25/t/category/ca/00003435/es/1#a1",
+            "category": "さやえんどう",
         },
         {
             "id": "Snowpeas_f",
@@ -123,9 +123,9 @@ class AgricultureSpider(scrapy.Spider):
             "category": "西洋なし",
         },
         {
-            "id":"westernpear_f",
-            "url":"https://shop.takii.co.jp/product/catalog/kw/%E6%9E%9C%E6%A8%B9%E5%AE%9F%E7%89%A9%E5%B0%82%E7%94%A8%E8%82%A5%E6%96%99",
-            "category":"西洋なし-肥料"
+            "id": "westernpear_f",
+            "url": "https://shop.takii.co.jp/product/catalog/kw/%E6%9E%9C%E6%A8%B9%E5%AE%9F%E7%89%A9%E5%B0%82%E7%94%A8%E8%82%A5%E6%96%99",
+            "category": "西洋なし-肥料",
         },
         # にら
         {

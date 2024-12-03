@@ -97,7 +97,7 @@ function sayIP() {
     echo "global ip is $globalip"
     echo "local ip is $localip"
     echo "http://127.0.0.1/"
-    echo "http://127.0.0.1/3000/docs"
+    echo "http://127.0.0.1:3000/docs"
 }
 function IsSessionAlive() {
     local sessionname=$1
