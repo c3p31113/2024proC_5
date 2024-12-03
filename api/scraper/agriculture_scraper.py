@@ -31,8 +31,16 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://www.kokkaen-ec.jp/products/list?category_id=162",
             "category": "いちご",
         },
-        # {"id": "strawberry", "url": "https://www.nogyoya.com/c/0000000104/0000001424", "category": "いちご"},
-        # {"id": "fertilizer_1", "url": "https://www.monotaro.com/k/store/%E3%81%84%E3%81%A1%E3%81%94%E3%81%AE%E8%82%A5%E6%96%99/?srsltid=AfmBOooDscVjpyHnlokkLwrxoQH3O4B2ttW78dy4ptUWarIamd7FtnP6", "category": "肥料"},タイムアウトする
+        {
+            "id": "strawberry",
+            "url": "https://shop.takii.co.jp/category/00006212",
+            "category": "いちご"
+        },
+        {
+            "id": "fertilizer_1",
+            "url": "https://shop.takii.co.jp/category/00010115",
+            "category": "いちご-肥料"
+        },
         # インゲン
         {
             "id": "greenbeans",
@@ -60,7 +68,11 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://www.matsuonouen.net/?mode=cate&cbid=2262850&csid=0",
             "category": "きゅうり",
         },
-        # {"id":"cucumber_f","url":"https://www.monotaro.com/k/store/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A%E8%82%A5%E6%96%99/?srsltid=AfmBOooWlROCPv60leBUUo9HPghbCe8qy5j-l7EBZij1MCFNVnXsLazT","category":"きゅうり"},
+        {
+            "id":"cucumber_f",
+            "url":"https://shop.takii.co.jp/product/catalog/kw/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A%E3%81%AE%E8%82%A5%E6%96%99",
+            "category":"きゅうり-肥料"
+        },
         {
             "id": "cucumber_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A+%E8%82%A5%E6%96%99/",
@@ -72,7 +84,11 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%95%E3%82%84%E3%81%88%E3%82%93%E3%81%A9%E3%81%86+%E7%A8%AE/",
             "category": "さやえんどう",
         },
-        # {"id":"Snowpeas","url":"https://www.monotaro.com/s/q-%E7%B5%B9%E3%81%95%E3%82%84%20%E7%A8%AE/?srsltid=AfmBOorbJhYVtN2VcShooilQcxu7e2xG6yOkk5f_bbSrHV46fugbJQuy","category":"さやえんどう"},
+        {
+            "id":"Snowpeas",
+            "url":"https://shop.takii.co.jp/product/catalog/s/default/n/25/t/category/ca/00003435/es/1#a1",
+            "category":"さやえんどう"
+        },
         {
             "id": "Snowpeas_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%88%E3%82%93%E3%81%A9%E3%81%86+%E8%82%A5%E6%96%99/",
@@ -106,7 +122,11 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://search.kakaku.com/%E8%8B%97%20%E8%A5%BF%E6%B4%8B%E6%A2%A8/",
             "category": "西洋なし",
         },
-        # {"id":"westernpear_f","url":"https://nagano-shizai.nd-agri.jp/products/list?category_id=972753","category":"西洋なし-肥料"},値段なし使用不可
+        {
+            "id":"westernpear_f",
+            "url":"https://shop.takii.co.jp/product/catalog/kw/%E6%9E%9C%E6%A8%B9%E5%AE%9F%E7%89%A9%E5%B0%82%E7%94%A8%E8%82%A5%E6%96%99",
+            "category":"西洋なし-肥料"
+        },
         # にら
         {
             "id": "Chinesechive",
@@ -145,7 +165,6 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://search.rakuten.co.jp/search/mall/%E3%83%94%E3%83%BC%E3%83%9E%E3%83%B3+%E8%82%A5%E6%96%99/",
             "category": "ピーマン-肥料",
         },
-        # {"id":"greenpepper_f","url":"https://www.monotaro.com/s/q-%E3%83%94%E3%83%BC%E3%83%9E%E3%83%B3%E8%82%A5%E6%96%99/?srsltid=AfmBOop08Cc_0nVkmaNInD74YOHRSj1fq82JP6rF6eYZIqMEoKJCCVcC","category":"ピーマン-肥料"},
         # ぶどう
         {
             "id": "grapes",
@@ -162,7 +181,6 @@ class AgricultureSpider(scrapy.Spider):
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%B6%E3%81%A9%E3%81%86+%E8%82%A5%E6%96%99/",
             "category": "ぶどう-肥料",
         },
-        # {"id":"grapes_f","url":"https://www.monotaro.com/k/store/%E3%83%96%E3%83%89%E3%82%A6%E3%81%AE%E8%82%A5%E6%96%99/?srsltid=AfmBOorWFx3axDWaVLjaMC3fboPZgJMysMctlSEgBKOoZmeCdQd8AJoU","category":"ぶどう-肥料"},
         # もも
         {
             "id": "peach",
@@ -177,11 +195,6 @@ class AgricultureSpider(scrapy.Spider):
         {
             "id": "peach_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E6%A1%83+%E8%82%A5%E6%96%99/",
-            "category": "もも-肥料",
-        },
-        {
-            "id": "peach_f",
-            "url": "https://www.sandonoyaku.com/?mode=grp&gid=2725988",
             "category": "もも-肥料",
         },
         # りんご
@@ -239,8 +252,6 @@ class AgricultureSpider(scrapy.Spider):
             prices = self.parse_tanehyo(response)
         elif "hanahiroba" in response.url:
             prices = self.parse_hanahiroba(response)
-        elif "sandonoyaku" in response.url:
-            prices = self.parse_sandonoyaku
         else:
             prices = []
         self.prices_by_id[url_id].extend(prices)  # type: ignore
@@ -420,24 +431,6 @@ class AgricultureSpider(scrapy.Spider):
         for card in cards:
             product_price_tag = card.find(
                 "div", class_="fs-c-productPrice fs-c-productPrice--selling"
-            )
-            if product_price_tag:
-                price_text = product_price_tag.get_text(strip=True)
-                price_match = re.search(r"\d+", price_text.replace(",", ""))
-                if price_match:
-                    prices.append(
-                        int(price_match.group())
-                    )  # 数値型に変換してリストに追加
-        return prices
-
-    def parse_sandonoyaku(self, response):
-        soup = BeautifulSoup(response.text, "html.parser")
-        cards = soup.find_all("ul", class_="product-list productlist-list")
-
-        prices = []  # 価格を格納するリスト
-        for card in cards:
-            product_price_tag = card.find(
-                "sapn", class_="product-list__price product-list__text"
             )
             if product_price_tag:
                 price_text = product_price_tag.get_text(strip=True)
