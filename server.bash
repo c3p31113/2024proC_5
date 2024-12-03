@@ -60,14 +60,14 @@ function main() {
         if ! IsWindowAlive $sessionname fastapi; then
             echo "fastapi window is not alive!"
             error=1
-        elif [ -z "$(ProcessesOfWindow $sessionname fastapi >/dev/null)" ]; then
+        elif [ -n "$(ProcessesOfWindow $sessionname fastapi >/dev/null)" ]; then #FIXME まだ動いてない！
             echo "fastapi isn't working!"
             error=1
         fi
         if ! IsWindowAlive $sessionname mariadb; then
             echo "mariadb window is not alive!"
             error=1
-        elif [ -z "$(ProcessesOfWindow $sessionname mariadb >/dev/null)" ]; then
+        elif [ -n "$(ProcessesOfWindow $sessionname mariadb >/dev/null)" ]; then
             echo "mariadb isn't working!"
             error=1
         fi
@@ -96,6 +96,8 @@ function sayIP() {
     localip=$(ifconfig | grep -e "inet " | grep -v "127.0.0.1" | awk '{print $2}')
     echo "global ip is $globalip"
     echo "local ip is $localip"
+    echo "http://127.0.0.1/"
+    echo "http://127.0.0.1/3000/docs"
 }
 function IsSessionAlive() {
     local sessionname=$1
