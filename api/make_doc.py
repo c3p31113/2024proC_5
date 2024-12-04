@@ -4,6 +4,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import datetime
 from os import makedirs
 from classes import Form
+from logging import getLogger
+
+logger = getLogger("uvicorn.app")
+print = logger.info
 
 
 def open_docx(path: str) -> DocumentObject:
@@ -92,35 +96,27 @@ def main(form: Form, doc: DocumentObject = DOC):
 
     for i in range(len(replace_List1)):
         table_replace(replace_List1[i], str(new_text_list1[i]))
-        print(table_replace)
 
     for i in range(len(replace_List2)):
         table_replace(replace_List2[i], str(new_text_list2[i]))
-        print(table_replace)
 
     for i in range(len(replace_List3)):
         table_replace(replace_List3[i], str(new_text_list3[i]))
-        print(table_replace)
 
     for i in range(len(replace_List4)):
         table_replace(replace_List4[i], str(new_text_list4[i]))
-        print(table_replace)
 
     for i in range(len(replace_List5)):
         table_replace(replace_List5[i], str(new_text_list5[i]))
-        print(table_replace)
 
     for i in range(len(replace_List6)):
         table_replace(replace_List6[i], str(new_text_list6[i]))
-        print(table_replace)
 
     for i in range(len(replace_List7)):
         table_replace(replace_List7[i], str(new_text_list7[i]))
-        print(table_replace)
 
     for i in range(len(replace_List8)):
         table_replace(replace_List8[i], str(new_text_list8[i]))
-        print(table_replace)
 
         # 年間農業粗収益を入力
         table_replace("@income", str(income))
