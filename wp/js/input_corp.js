@@ -13,7 +13,7 @@ async function loadCropOptions(products) {
         select.innerHTML = `<option value="None">---</option>`;
 
         products.body.forEach(product => {
-            console.log(product.id);
+            console.log(product.ID);
             const option = document.createElement("option");
             option.value = product.id;
             option.textContent = product.name;
