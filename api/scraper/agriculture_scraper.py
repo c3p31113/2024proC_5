@@ -46,7 +46,7 @@ class AgricultureSpider(scrapy.Spider):
                     "category": "いちご",
                 },
                 {
-                    "id": "fertilizer_1",
+                    "id": "strawberry_f",
                     "url": "https://shop.takii.co.jp/category/00010115",
                     "category": "いちご-肥料",
                 },
