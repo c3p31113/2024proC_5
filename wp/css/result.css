@@ -1,0 +1,211 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header,
+footer {
+    background-color: #ae5123;
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.button-container {
+    display: flex;
+    background-color: #8b4513;
+    color: white;
+    width: 100%;
+    position: fixed;
+    top: 5rem;
+    z-index: 900;
+}
+
+.button-box {
+    flex: 1;
+    text-align: center;
+    padding: 1.5rem 0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.button-box:hover {
+    background-color: chocolate;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 12rem;
+    padding: 1rem;
+    width: 90%;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 100px;
+}
+
+.record-container {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    text-align: left;
+}
+
+.record-container .crop-label,
+.record-container .area-label {
+    width: 50%;
+    text-align: left;
+    font-size: 1.8rem;
+    white-space: nowrap;
+}
+
+.record-container select,
+.record-container input {
+    flex: 1;
+    padding: 0.75rem;
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.unit {
+    font-weight: bold;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+    font-size: 1.8rem;
+}
+
+.record-container.labor label {
+    font-size: 1.8rem;
+}
+
+.record-container.labor {
+    justify-content: flex-start;
+}
+
+.decide-button {
+    position: fixed;
+    bottom: 90px;
+    right: 30px;
+}
+
+.decide-button button {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    background-color: #ae5123;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 5px;
+}
+
+.decide-button button:hover {
+    background-color: #8b4513;
+}
+
+.add-button {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    background-color: #ae5123;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    z-index: 950;
+}
+
+.add-button:hover {
+    background-color: #8b4513;
+}
+
+footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 60px;
+    padding-right: 20px;
+    z-index: 900;
+}
+
+.export-Word {
+    position: fixed;
+    bottom: 80px;
+    /* フッターの上に配置 */
+    right: 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 950;
+}
+
+.export-Word:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .button-box {
+        font-size: 1.2rem;
+        padding: 1rem 0;
+    }
+
+    .record-container {
+        flex-direction: column;
+    }
+
+    .record-container label,
+    .record-container select,
+    .record-container input {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .crop-label,
+    .area-label {
+        display: none;
+    }
+
+    .record-container.labor {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .decide-button button {
+        font-size: 1.2rem;
+        padding: 0.5rem 1.5rem;
+    }
+
+    footer {
+        padding-right: 10px;
+        height: 50px;
+    }
+}
