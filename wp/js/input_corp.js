@@ -14,7 +14,7 @@ async function loadCropOptions(products) {
 
         products.body.forEach(product => {
             const option = document.createElement("option");
-            option.value = product.name;
+            option.value = product.id;
             option.textContent = product.name;
             select.appendChild(option);
         });
@@ -47,7 +47,7 @@ async function loadCropOptionsToSelect(selectElement) {
 
         products.body.forEach(product => {
             const option = document.createElement("option");
-            option.value = product.name;
+            option.value = product.id;
             option.textContent = product.name;
             selectElement.appendChild(option);
         });
@@ -55,3 +55,43 @@ async function loadCropOptionsToSelect(selectElement) {
         console.error("Error loading crop options:", error);
     }
 }
+
+
+async function submitCropForm() {
+    try {
+        // フォーム要素を取得
+        const formElement = document.getElementById('cropForm');
+
+        // 作物データを収集
+        const crops = Array.from(formElement.querySelectorAll('.record-container'))
+            .filter(container => container.querySelector('select') && container.querySelector('input[name="area"]'))
+            .map(container => {
+                return {
+                    id: parseInt(container.querySelector('select').value, 10), // 選択した product.id を取得
+                    amount: parseFloat(container.querySelector('input[name="area"]').value) || 0 // 面積
+                };
+            });
+
+        // 労働人数を取得
+        const manpower = parseInt(formElement.querySelector('input[name="labor"]').value, 10) || 0;
+
+        // 送信データの形式を整える
+        const formData = {
+            id: null,
+            product_array: crops, // 作物リスト
+            manpower: manpower // 労働人数
+        };
+
+        // データ送信
+        await postForm(formData);
+        console.log("Form submitted successfully:", formData);
+    } catch (error) {
+        console.error("Error submitting the form:", error);
+    }
+}
+
+// フォームの送信ボタンにイベントリスナーを追加
+document.getElementById('cropForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); // ページのリロードを防ぐ
+    await submitCropForm();
+});
