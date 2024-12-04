@@ -71,19 +71,19 @@ async function submitCropForm() {
         return selectExists && inputExists;
     });
 
-console.log(validContainers); // フィルタリング後の validContainers を確認
+    console.log(validContainers); // フィルタリング後の validContainers を確認
 
-const crops = validContainers.map(container => {
-    const selectValue = container.querySelector('select').value;
-    const areaValue = container.querySelector('input[name="area"]').value;
-    console.log(selectValue, areaValue); // 値を確認
-    return {
-        id: parseInt(selectValue, 10), // 選択した product.id を取得
-        amount: parseFloat(areaValue) || 0 // 面積
-    };
-});
+    const crops = validContainers.map(container => {
+        const selectValue = container.querySelector('select').value;
+        const areaValue = container.querySelector('input[name="area"]').value;
+        console.log(selectValue, areaValue); // 値を確認
+        return {
+            id: parseInt(selectValue, 10), // 選択した product.id を取得
+            amount: parseFloat(areaValue) || 0 // 面積
+        };
+    });
 
-console.log(crops); // 最終的に作成された crops を確認
+    console.log(crops); // 最終的に作成された crops を確認
 
     // 労働人数を取得
     const manpower = parseInt(formElement.querySelector('input[name="labor"]').value, 10) || 0;
