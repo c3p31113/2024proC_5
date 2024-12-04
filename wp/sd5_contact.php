@@ -38,6 +38,9 @@
     <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
   </footer>
 
+  <!-- ホームに戻るボタンを追加 -->
+  <button class="home-button" onclick="location.href='sd5_home.html'">←ホームに戻る</button>
+
 </body>
 
 </html>
