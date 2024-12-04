@@ -10,10 +10,10 @@ async function loadCropOptions(products) {
     try {
         const products = await getProducts();
         console.log(products);
+        console.log(products.id);
         select.innerHTML = `<option value="0">---</option>`;
 
         products.body.forEach(product => {
-            console.log(product.id);
             const option = document.createElement("option");
             option.value = product.id;
             option.textContent = product.name;
