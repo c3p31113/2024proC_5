@@ -1,0 +1,99 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header,
+footer {
+    background-color: #ae5123;
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    padding-top: 25px;
+    padding-bottom: 17px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    /* 文字を大きく */
+}
+
+.button-container {
+    display: flex;
+    background-color: #8b4513;
+    color: white;
+    width: 100%;
+    position: fixed;
+    top: 4rem;
+    z-index: 900;
+    padding-top: 1.2rem;
+}
+
+.button-box {
+    flex: 1;
+    text-align: center;
+    padding: 1.5rem 0;
+    /* 文字を大きく */
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.8rem;
+    /* 文字を大きく */
+}
+
+.button-box:hover {
+    background-color: chocolate;
+}
+
+footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 60px;
+    padding-right: 20px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin-top: 6rem;
+    /* 上部に移動 */
+    padding: 1rem;
+}
+
+.description-container {
+    background-color: #f0f0f0;
+    padding: 2rem;
+    border-radius: 0;
+    margin-bottom: 2rem;
+    width: 85%;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.start-button {
+    background-color: #8b4513;
+    color: white;
+    border: none;
+    padding: 1.5rem 3rem;
+    border-radius: 30px;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    background-color: #5a2e1a;
+    /* ボタンのホバー色を調整 */
+}
