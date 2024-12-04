@@ -65,10 +65,12 @@ def main(form: Form, doc: DocumentObject = DOC):
         cost = 0
         hectal = productinform.amount
     # TODO 生産量 = @経営規模(広さ) * @単位規模当たりの生産量
-
+        pro_amount = hectal * kg_per_1a
     # TODO 農業粗収益 = 生産量 * @単価
-
+        gross_profit = pro_amount * cost
     # TODO 農業所得 = 農業粗収益 - @農業経営費
+        income = pro_amount - cost
+
 
     new_text_list1 = ["ジャガ", "10a", "1000kg"]
     new_text_list2 = ["人参", "8a", "800kg"]
@@ -119,6 +121,9 @@ def main(form: Form, doc: DocumentObject = DOC):
     for i in range(len(replace_List8)):
         table_replace(replace_List8[i], str(new_text_list8[i]))
         print(table_replace)
+
+        # 年間農業粗収益を入力
+        table_replace("@income", str(income))
 
     # 農業粗収益
     table_replace("農業粗収益の計算", str())
