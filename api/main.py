@@ -276,6 +276,7 @@ async def update_price(
 @app.get("/v1/get_file")
 async def get_result_file(_request: None = Depends(log_accessor)) -> FileResponse:
     return FileResponse(
+        headers={"Content-Disposition": "attachment;"},
         path="./tmp/Result.docx",
         filename="result.docx",
     )

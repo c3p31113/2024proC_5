@@ -1,5 +1,5 @@
 //@ts-check
-import { getProducts } from "./APIaccessor.js";
+import { getProducts, downloadResult } from "./APIaccessor.js";
 
 window.onload = function onload() {
     Main();
@@ -17,6 +17,7 @@ async function Main() {
         card.textContent = product.name + " " + product.summary;
         base?.appendChild(card);
     });
+    await downloadResult();
     // postForm({
     //     "product_array": [
 
