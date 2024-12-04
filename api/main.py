@@ -1,18 +1,25 @@
 from typing import Any
-from json import dumps, loads, load
+from json import dumps, load
 from os import system as shell
 
 from logging import getLogger
 from uvicorn import run as uvicornrun
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 
-from fastapi import FastAPI, status, Request, Depends, HTTPException
+from fastapi import FastAPI, status, Request, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
+from exceptions import (
+    EXCEPTION_BLANK_CLIENT_IP,
+    EXCEPTION_BLANK_QUERY,
+    EXCEPTION_REQUEST_FAILED_TO_PROCESS,
+    EXCEPTION_REQUEST_INVALID,
+)
+from classes import Contact, Form, Product, ProductCategory
 from databases import literals as databaseliterals
-from databases.accessor import connect, selectFrom, insertInto, update
+from databases.accessor import connect, insertInto, update
 import security.authenticate as auth
 from make_doc import main as make_docer
 
@@ -48,207 +55,6 @@ class APIResponse(BaseModel):
     message: str
     body: Any = None
 
-
-class Product(BaseModel):
-    ID: int
-    name: str
-    summary: str | None
-    desc: str | None
-    product_categories_ID: int
-    yen_per_kg: int
-    kg_per1a: int
-
-    @staticmethod
-    def all_from_DB() -> "list[Product]":
-        connection = connect()
-        products = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_PRODUCTS,
-            "*",
-        )
-        connection.close()
-        if products is None:
-            raise EXCEPTION_FAILED_TO_CONNECT_DB
-        result: list[Product] = []
-        for product in products:
-            result.append(Product(**product))
-        return result
-
-    @staticmethod
-    def one_from_DB(id: int) -> "Product | None":
-        if id is None:
-            raise EXCEPTION_BLANK_QUERY
-        connection = connect()
-        product = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_PRODUCTS,
-            "*",
-            f"ID = {id}",
-            True,
-        )
-        connection.close()
-        return Product(**product)
-
-
-class ProductCategory(BaseModel):
-    ID: int
-    name: str
-    summary: str | None
-
-    @staticmethod
-    def all_from_DB() -> "list[ProductCategory]":
-        connection = connect()
-        product_categories = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-            "*",
-        )
-        connection.close()
-        if product_categories is None:
-            raise EXCEPTION_FAILED_TO_CONNECT_DB
-        result: list[ProductCategory] = []
-        for product_category in product_categories:
-            result.append(ProductCategory(**product_category))
-        return result
-
-    @staticmethod
-    def one_from_DB(id: int) -> "ProductCategory | None":
-        if id is None:
-            raise EXCEPTION_BLANK_QUERY
-        connection = connect()
-        productCategory = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_PRODUCTCATEGORIES,
-            "*",
-            f"ID = {id}",
-            True,
-        )
-        connection.close()
-        return ProductCategory(**productCategory)
-
-
-class Contact(BaseModel):
-    ID: int
-    email_address: str
-    form_id: int | None = None
-    title: str
-    content: str
-
-    @staticmethod
-    def all_from_DB() -> "list[Contact]":
-        connection = connect()
-        contacts = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_CONTACTS,
-            "*",
-        )
-        connection.close()
-        if contacts is None:
-            raise EXCEPTION_FAILED_TO_CONNECT_DB
-
-        result: list[Contact] = []
-        for contact in contacts:
-            instance = Contact(**contact)
-            result.append(instance)
-        return result
-
-    @staticmethod
-    def one_from_DB(id: int) -> "Contact | None":
-        connection = connect()
-        contact = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_CONTACTS,
-            "*",
-            f"ID = {id}",
-            True,
-        )
-        if contact is None:
-            return None
-        connection.close()
-        return Contact(**contact)
-
-
-class Form(BaseModel):
-    class ProductInForm(BaseModel):
-        id: int
-        amount: float
-
-        def get_product(self) -> Product | None:
-            return Product.one_from_DB(self.id)
-
-    id: int
-    product_array: list[ProductInForm]
-    manpower: int
-
-    def get_Products(self) -> list[Product | None]:
-        result = []
-        for product in self.product_array:
-            result.append(product.get_product())
-        return result
-
-    @staticmethod
-    def all_from_DB() -> "list[Form]":
-        connection = connect()
-        forms = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_FORM,
-            "*",
-        )
-        connection.close()
-        if forms is None:
-            raise EXCEPTION_FAILED_TO_CONNECT_DB
-
-        result: list[Form] = []
-        for contact in forms:
-            instance = Form(**contact)
-            result.append(instance)
-        return result
-
-    @staticmethod
-    def one_from_DB(id: int) -> "Form | None":
-        connection = connect()
-        form = selectFrom(
-            connection,
-            databaseliterals.DATABASE_TABLE_FORM,
-            "*",
-            f"ID = {id}",
-            True,
-        )
-        if form is None:
-            return None
-        connection.close()
-        product_array: list[Form.ProductInForm] = []
-        try:
-            for product in loads(form["product_array"]):
-                result = Form.ProductInForm(**product)
-                product_array.append(result)
-        except ValidationError:
-            return None
-        return Form(
-            id=form["ID"], product_array=product_array, manpower=form["manpower"]
-        )
-
-
-EXCEPTION_FAILED_TO_CONNECT_DB = HTTPException(
-    detail="couldn't connect to database",
-    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-)
-EXCEPTION_BLANK_CLIENT_IP = HTTPException(
-    detail="somehow you are non-existance client. couldn't get your IP",
-    status_code=status.HTTP_400_BAD_REQUEST,
-)
-EXCEPTION_BLANK_QUERY = HTTPException(
-    detail="query was blank",
-    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-)
-EXCEPTION_REQUEST_INVALID = HTTPException(
-    detail="request form was invalid to read. check data structure",
-    status_code=status.HTTP_400_BAD_REQUEST,
-)
-EXCEPTION_REQUEST_FAILED_TO_PROCESS = HTTPException(
-    detail="request was failed to process.",
-    status_code=status.HTTP_400_BAD_REQUEST,
-)
 
 RESPONSE_REQUEST_PROCESSED = APIResponse(
     message="request was processed successfully.", body=True
@@ -370,7 +176,7 @@ def post_form(
         ],
     )
     connection.close()
-    make_docer()
+    make_docer(form)
     if result:
         return RESPONSE_REQUEST_PROCESSED
     else:

@@ -3,6 +3,7 @@ from docx.document import Document as DocumentObject
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import datetime
 from os import makedirs
+from classes import Form
 
 
 def open_docx(path: str) -> DocumentObject:
@@ -21,7 +22,7 @@ def open_docx(path: str) -> DocumentObject:
 DOC = open_docx("api/Test.docx")
 
 
-def main(doc: DocumentObject = DOC):
+def main(form: Form, doc: DocumentObject = DOC):
     # print("段落の個数:", len(doc.paragraphs))
 
     print("表の個数:", len(doc.tables))
@@ -55,6 +56,14 @@ def main(doc: DocumentObject = DOC):
     #     print("".join(row_text).replace("\u3000", "_"))
 
     # TODO 計算式@マークの部分はDBから受け取る
+    for productinform in form.product_array:
+        product = productinform.get_product()
+        if product is None:
+            continue
+        yen_per_kg: int = product.yen_per_kg
+        kg_per_1a = product.kg_per_1a
+        cost = 0
+        hectal = productinform.amount
     # TODO 生産量 = @経営規模(広さ) * @単位規模当たりの生産量
 
     # TODO 農業粗収益 = 生産量 * @単価
@@ -145,4 +154,4 @@ def table_replace(old_text: str, new_text: str):
 
 
 if __name__ == "__main__":
-    main()
+    main(Form(id=5, product_array=[Form.ProductInForm(id=4, amount=3)], manpower=1))
