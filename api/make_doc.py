@@ -55,22 +55,22 @@ def main(form: Form, doc: DocumentObject = DOC):
     #     # print(row_text)
     #     print("".join(row_text).replace("\u3000", "_"))
 
-    # TODO 計算式@マークの部分はDBから受け取る
+    # 計算式@マークの部分はDBから受け取る
     for productinform in form.product_array:
         product = productinform.get_product()
+        pass
         if product is None:
             continue
         yen_per_kg: int = product.yen_per_kg
         kg_per_1a = product.kg_per_1a
         cost = 0
         hectal = productinform.amount
-    # TODO 生産量 = @経営規模(広さ) * @単位規模当たりの生産量
+        # 生産量 = @経営規模(広さ) * @単位規模当たりの生産量
         pro_amount = hectal * kg_per_1a
-    # TODO 農業粗収益 = 生産量 * @単価
-        gross_profit = pro_amount * cost
-    # TODO 農業所得 = 農業粗収益 - @農業経営費
+        # 農業粗収益 = 生産量 * @単価
+        gross_profit = pro_amount * yen_per_kg
+        # 農業所得 = 農業粗収益 - @農業経営費
         income = pro_amount - cost
-
 
     new_text_list1 = ["ジャガ", "10a", "1000kg"]
     new_text_list2 = ["人参", "8a", "800kg"]
