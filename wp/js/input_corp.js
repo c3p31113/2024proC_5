@@ -10,10 +10,10 @@ async function loadCropOptions(products) {
     try {
         const products = await getProducts();
         console.log(products);
-        select.innerHTML = `<option value="None">---</option>`;
+        select.innerHTML = `<option value="0">---</option>`;
 
         products.body.forEach(product => {
-            console.log(product.ID);
+            console.log(product.id);
             const option = document.createElement("option");
             option.value = product.id;
             option.textContent = product.name;
@@ -44,7 +44,7 @@ async function loadCropOptionsToSelect(selectElement) {
     try {
         const products = await getProducts();
         console.log(products);
-        selectElement.innerHTML = `<option value="None">---</option>`;
+        selectElement.innerHTML = `<option value="0">---</option>`;
 
         products.body.forEach(product => {
             const option = document.createElement("option");
