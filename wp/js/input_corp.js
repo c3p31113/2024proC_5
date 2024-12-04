@@ -114,9 +114,11 @@ console.log(crops); // 最終的に作成された crops を確認
         // データ送信
         await postForm(formData);
         console.log("Form submitted successfully:", formData);
-    } catch (error) {
-        console.error("Error submitting the form:", error);
-    }
+
+        window.location.href = "sd5_result.html";  // ページ遷移
+        } catch (error) {
+            console.error("Error submitting the form:", error);
+        }
 }
 
 // フォームの送信ボタンにイベントリスナーを追加
