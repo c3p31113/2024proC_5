@@ -1,10 +1,28 @@
 import { getProducts, postForm } from "./APIaccessor.js";
 
 window.onload = function () {
+    loadCropOptions("cropinput");
     document.getElementById('add-button').addEventListener('click', addCropArea);
 };
 
+async function loadCropOptions(products) {
+    const select = document.getElementById(products);
+    try {
+        const products = await getProducts();
+        console.log(products);
+        console.log(products.ID);
+        select.innerHTML = `<option value="0">---</option>`;
 
+        products.body.forEach(product => {
+            const option = document.createElement("option");
+            option.value = product.ID;
+            option.textContent = product.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading crop options:", error);
+    }
+}
 async function addCropArea() {
     const container = document.createElement('div');
     container.className = 'record-container';
