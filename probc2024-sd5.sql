@@ -66,7 +66,7 @@ CREATE TABLE `products` (
   `desc` text DEFAULT NULL,
   `product_categories_ID` int(50) NOT NULL,
   `kg_per_1a` DOUBLE NOT NULL,
-  `yen_per_1kg` DOUBLE NOT NULL
+  `yen_per_kg` DOUBLE NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 --
 -- テーブルのデータのダンプ `products`
@@ -79,7 +79,7 @@ INSERT INTO `products` (
     `desc`,
     `product_categories_ID`,
     `kg_per_1a`,
-    `yen_per_1kg`
+    `yen_per_kg`
   )
 VALUES (1, 'あんぽ柿', '品種は平核無柿、蜂屋柿など', NULL, 1, 78, 240),
   (2, 'いちご', '品種はとちおとめ、さちのか、など', NULL, 2, 218, 1190),

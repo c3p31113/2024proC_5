@@ -122,14 +122,14 @@ def main(form: Form, doc: DocumentObject = DOC):
 
     # 農業粗収益
     table_replace("農業粗収益の計算", str())
-    makedirs("tmp/", exist_ok=True)
+    makedirs("./tmp/", exist_ok=True)
 
     # 別名保存
-    doc.save("tmp/Result.docx")
+    doc.save("./tmp/Result.docx")
     print("./tmp/Result.docx に保存")
 
     # 保存後のファイル中身確認
-    doc = open_docx("tmp/Result.docx")  # ファイル名とパスを正確に指定
+    doc = open_docx("./tmp/Result.docx")  # ファイル名とパスを正確に指定
 
 
 def replace(len: int, old_text: str, new_text: str):

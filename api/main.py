@@ -9,6 +9,7 @@ from pydantic.json import pydantic_encoder
 
 from fastapi import FastAPI, status, Request, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from exceptions import (
@@ -270,6 +271,14 @@ async def update_price(
             where=f"id={product["id"]}",
         )
     return APIResponse(message="ok", body=scraped_data)
+
+
+@app.get("/v1/get_file")
+async def get_result_file(_request: None = Depends(log_accessor)) -> FileResponse:
+    return FileResponse(
+        path="./tmp/Result.docx",
+        filename="result.docx",
+    )
 
 
 if __name__ == "__main__":
