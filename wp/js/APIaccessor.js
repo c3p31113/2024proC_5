@@ -3,7 +3,7 @@
  * @typedef {{id: number, name: string, summary: string | null, desc: string | null, product_categories_ID : number, yen_per_kg: number, yen_per_1a : number}} Product
  * @typedef {{id: number, name: string, summary: string}} ProductCategory
  * @typedef {{id: number, manpower: number, product_array : Array<ProductInForm>}} Form
- * @typedef {{manpower: number, product_array : Array<ProductInForm>}} SendingForm
+ * @typedef {{id: null, manpower: number, product_array : Array<ProductInForm>}} SendingForm
  * @typedef {{id: number, amount: number}} ProductInForm
  * @typedef {{id: number, email_address: string, form_id: number | null, title : string, content: string}} Contact
  * @typedef {{"message": string, body: Array<Product>}} APIResponseProducts
