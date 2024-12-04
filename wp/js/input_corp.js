@@ -2,7 +2,7 @@ import { getProducts } from "./APIaccessor.js";
 
 window.onload = function () {
     loadCropOptions("cropinput");
-    document.getElementById('addCropButton').addEventListener('click', addCropArea);
+    document.getElementById('add-button').addEventListener('click', addCropArea);
 };
 
 async function loadCropOptions(products) {
