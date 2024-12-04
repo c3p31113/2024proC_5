@@ -84,14 +84,14 @@ replace(3, "dd", str(dt_now.day))
 
 # 農業所得 = 農業粗収益 - @農業経営費
 
-new_text_list1 = ["ジャガイモ","10a", "1000kg"]
-new_text_list2 = []
-new_text_list3 = []
-new_text_list4 = []
-new_text_list5 = []
-new_text_list6 = []
-new_text_list7 = []
-new_text_list8 = []
+new_text_list1 = ["ジャガ","10a", "1000kg"]
+new_text_list2 = ["人参","8a","800kg"]
+new_text_list3 = ["","",""]
+new_text_list4 = ["","",""]
+new_text_list5 = ["","",""]
+new_text_list6 = ["","",""]
+new_text_list7 = ["","",""]
+new_text_list8 = ["","",""]
 
 replace_List1=["作物１","面積１","生産量１"]
 replace_List2=["作物２","面積２","生産量２"]
