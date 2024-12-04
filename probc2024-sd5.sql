@@ -66,7 +66,7 @@ CREATE TABLE `products` (
   `desc` text DEFAULT NULL,
   `product_categories_ID` int(50) NOT NULL,
   `kg_per_1a` DOUBLE NOT NULL,
-  `yen_per_1a` DOUBLE NOT NULL
+  `yen_per_1kg` DOUBLE NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 --
 -- テーブルのデータのダンプ `products`

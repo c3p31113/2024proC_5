@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from databases import literals as databaseliterals
 from databases.accessor import connect, selectFrom, insertInto, update
 import security.authenticate as auth
+from make_doc import main as make_docer
 
 
 PORT = 3000
@@ -369,6 +370,7 @@ def post_form(
         ],
     )
     connection.close()
+    make_docer()
     if result:
         return RESPONSE_REQUEST_PROCESSED
     else:
@@ -449,7 +451,7 @@ async def update_price(
     # current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
     FILENAME = "./tmp/test.json"
-    shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
+    # shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
     logger.info("scraped.")
     with open(FILENAME, mode="r") as file:
         scraped_data: list[dict] = load(file)
