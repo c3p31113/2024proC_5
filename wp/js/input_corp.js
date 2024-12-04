@@ -59,6 +59,44 @@ async function loadCropOptionsToSelect(selectElement) {
 
 
 async function submitCropForm() {
+    // フォーム要素を取得
+    const formElement = document.getElementById('cropForm');
+
+    // 作物データを収集
+    const containers = Array.from(formElement.querySelectorAll('.record-container'));
+    console.log(containers); // まず、取得した .record-container を確認
+    const validContainers = containers.filter(container => {
+        const selectExists = container.querySelector('select');
+        const inputExists = container.querySelector('input[name="area"]');
+        console.log(selectExists, inputExists); // select と input が存在するか確認
+        return selectExists && inputExists;
+    });
+
+    console.log(validContainers); // フィルタリング後の validContainers を確認
+
+    const crops = validContainers.map(container => {
+        const selectValue = container.querySelector('select').value;
+        const areaValue = container.querySelector('input[name="area"]').value;
+        console.log(selectValue, areaValue); // 値を確認
+        return {
+            id: parseInt(selectValue, 10), // 選択した product.id を取得
+            amount: parseFloat(areaValue) || 0 // 面積
+        };
+    });
+
+    console.log(crops); // 最終的に作成された crops を確認
+
+    // 労働人数を取得
+    const manpower = parseInt(formElement.querySelector('input[name="labor"]').value, 10) || 0;
+
+    // 送信データの形式を整える
+    const formData = {
+        id: null,
+        product_array: crops, // 作物リスト
+        manpower: manpower // 労働人数
+    };
+
+    // データ送信
     try {
         // フォーム内のデータを処理
         const formElement = document.getElementById('cropForm');
