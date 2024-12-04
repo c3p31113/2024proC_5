@@ -119,7 +119,6 @@ console.log(crops); // 最終的に作成された crops を確認
     }
 }
 
-
 // フォームの送信ボタンにイベントリスナーを追加
 document.getElementById('cropForm').addEventListener('submit', async (event) => {
     event.preventDefault(); // ページのリロードを防ぐ

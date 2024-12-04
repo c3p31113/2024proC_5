@@ -135,7 +135,7 @@ class Form(BaseModel):
         def get_product(self) -> Product | None:
             return Product.one_from_DB(self.id)
 
-    id: int
+    id: int | None
     product_array: list[ProductInForm]
     manpower: int
 
