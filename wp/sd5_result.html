@@ -2,58 +2,48 @@
 <html lang="ja">
 
 <head>
-  <meta charset="UTF-8">
-  <title>スクレイピング結果</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/result.css">
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>スクレイピング結果</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/result.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-  <header>
-    <h1 onclick="location.href='sd5_home.html'">書類作成補助システム</h1>
-  </header>
-  <div class="button-container">
-    <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
-    <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
-  </div>
-  <div class="content-container">
-    <h1>スクレイピング結果</h1>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>作物名</th>
-          <th>肥料</th>
-          <th>農薬</th>
-          <th>成長期</th>
-          <th>価格</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for crop in crops %}
-        <tr>
-          <td>{{ crop[0] }}</td>
-          <td>{{ crop[1] }}</td>
-          <td>{{ crop[2] }}</td>
-          <td>{{ crop[3] }}</td>
-          <td>{{ crop[4] }}</td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5">データがありません。</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <button type="button" class="btn btn-primary export-Word">Wordで出力</button>
-  <footer>
-    <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
-  </footer>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script type="module" src="./js/scrapeResult.js"></script>
+    <header>
+        <h1 onclick="location.href='sd5_home.html'">書類作成補助システム</h1>
+    </header>
+    <div class="button-container">
+        <div class="button-box" onclick="location.href='sd5_notification.html'">お知らせ</div>
+        <div class="button-box" onclick="location.href='sd5_contact.php'">問い合わせ</div>
+    </div>
+    <div class="content-container">
+        <h1>スクレイピング結果</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>作物名</th>
+                    <th>種苗価格</th>
+                    <th>肥料価格</th>
+                </tr>
+            </thead>
+            <tbody id="scraperResult">
+                <tr>
+                    <td>{{ crop[0] }}</td>
+                    <td>{{ crop[1] }}</td>
+                    <td>{{ crop[2] }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button type="button" class="btn btn-primary export-Word">Wordで出力</button>
+    <footer>
+        <button type="button" class="btn btn-secondary" onclick="location.href='sd5_login.php'">管理者ログイン</button>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module" src="./js/scrapeResult.js"></script>
 </body>
 
 </html>
