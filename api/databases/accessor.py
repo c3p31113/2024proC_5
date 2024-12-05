@@ -69,11 +69,9 @@ def insertInto(
             continue
         if type(value) is int or (type(value) is str and value.isdecimal()):
             value_result.append(str(value))
-        # elif type(value) is str and (
-        #     not value.startswith('"') and not value.endswith('"')
-        # ):
-        # FIXME 暫定処置！！！
-        elif type(value) is str:
+        elif type(value) is str and (
+            not value.startswith('"') and not value.endswith('"')
+        ):
             value_result.append(f'"{value}"')
         columns_result.append(columns[i])
         continue

@@ -6,10 +6,12 @@
  * @typedef {{id: null, manpower: number, product_array : Array<ProductInForm>}} SendingForm
  * @typedef {{id: number, amount: number}} ProductInForm
  * @typedef {{id: number, email_address: string, form_id: number | null, title : string, content: string}} Contact
- * @typedef {{"message": string, body: Array<Product>}} APIResponseProducts
- * @typedef {{"message": string, body: Product}} APIResponseProduct
- * @typedef {{"message": string, body: Array<ProductCategory>}} APIResponsePProductCategories
- * @typedef {{"message": string, body: ProductCategory}} APIResponsePProductCategory
+ * @typedef {{message: string, body: Array<Product>}} APIResponseProducts
+ * @typedef {{message: string, body: Product}} APIResponseProduct
+ * @typedef {{message: string, body: Array<ProductCategory>}} APIResponsePProductCategories
+ * @typedef {{message: string, body: ProductCategory}} APIResponsePProductCategory
+ * @typedef {{id: number, price: number}} ProductInScrape
+ * @typedef {{message: string, body: Array<ProductInScrape>}} APIResponseScrape
 */
 /**
  * 
@@ -45,6 +47,13 @@ export async function getProductCategories() {
  */
 export async function getProductCategory(id = 0) {
     return (await get(`/v1/productCategories/${id}`)).json()
+}
+/**
+ * 
+ * @returns {Promise<APIResponseScrape>}
+ */
+export async function getScrape() {
+    return (await get("/v1/scrape")).json();
 }
 
 /**

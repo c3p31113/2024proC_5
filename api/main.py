@@ -253,8 +253,8 @@ async def read_admin_me(
     return current_admin
 
 
-@app.get("/v1/update_price")
-async def update_price(
+@app.get("/v1/scrape")
+async def get_scrape(
     # current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
     FILENAME = "./tmp/test.json"
