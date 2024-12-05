@@ -12,205 +12,205 @@ class AgricultureSpider(scrapy.Spider):
     urls_with_metadata = [  # {"id":"","url":"","category":""},コピー元
         # かき
         {
-            "id": "persimmon",
+            "id": "1",
             "url": "https://search.rakuten.co.jp/search/mall/%E8%9C%82%E5%B1%8B%E6%9F%BF%E8%8B%97/",
             "category": "蜂屋柿苗",
         },
         {
-            "id": "persimmon",
+            "id": "1",
             "url": "https://shopping.yahoo.co.jp/search/%E5%B9%B2%E3%81%97%E6%9F%BF+%E8%9C%82%E5%B1%8B%E6%9F%BF/38289/",
             "category": "蜂屋柿苗",
         },
         {
-            "id": "persimmon_f",
+            "id": "1_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E6%9F%BF+%E3%81%AE+%E8%82%A5%E6%96%99/",
             "category": "蜂屋柿苗-肥料",
         },
         # いちご
         {
-            "id": "strawberry",
+            "id": "2",
             "url": "https://www.kokkaen-ec.jp/products/list?category_id=162",
             "category": "いちご",
         },
         {
-            "id": "strawberry",
+            "id": "2",
             "url": "https://shop.takii.co.jp/category/00006212",
             "category": "いちご",
         },
         {
-            "id": "strawberry_f",
+            "id": "2_f",
             "url": "https://shop.takii.co.jp/category/00010115",
             "category": "いちご-肥料",
         },
         # インゲン
         {
-            "id": "greenbeans",
+            "id": "3",
             "url": "https://shop.takii.co.jp/category/00007799",
             "category": "インゲン",
         },
         {
-            "id": "greenbeans",
+            "id": "3",
             "url": "https://search.kakaku.com/%E7%A8%AE%20%E3%82%A4%E3%83%B3%E3%82%B2%E3%83%B3/",
             "category": "インゲン",
         },
         {
-            "id": "greenbeans_f",
+            "id": "3_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E8%B1%86%E8%82%A5%E6%96%99/",
             "category": "インゲン-肥料",
         },
         # きゅうり
         {
-            "id": "cucumber",
+            "id": "4",
             "url": "https://shop.takii.co.jp/category/00003415",
             "category": "きゅうり",
         },
         {
-            "id": "cucumber",
+            "id": "4",
             "url": "https://www.matsuonouen.net/?mode=cate&cbid=2262850&csid=0",
             "category": "きゅうり",
         },
         {
-            "id": "cucumber_f",
+            "id": "4_f",
             "url": "https://shop.takii.co.jp/product/catalog/kw/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A%E3%81%AE%E8%82%A5%E6%96%99",
             "category": "きゅうり-肥料",
         },
         {
-            "id": "cucumber_f",
+            "id": "5_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%8D%E3%82%85%E3%81%86%E3%82%8A+%E8%82%A5%E6%96%99/",
             "category": "きゅうり",
         },
         # さやえんどう
         {
-            "id": "Snowpeas",
+            "id": "6",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%95%E3%82%84%E3%81%88%E3%82%93%E3%81%A9%E3%81%86+%E7%A8%AE/",
             "category": "さやえんどう",
         },
         {
-            "id": "Snowpeas",
+            "id": "6",
             "url": "https://shop.takii.co.jp/product/catalog/s/default/n/25/t/category/ca/00003435/es/1#a1",
             "category": "さやえんどう",
         },
         {
-            "id": "Snowpeas_f",
+            "id": "6_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%88%E3%82%93%E3%81%A9%E3%81%86+%E8%82%A5%E6%96%99/",
             "category": "さやえんどう-肥料",
         },
         # しいたけ
         {
-            "id": "Shiitake",
+            "id": "7",
             "url": "https://search.kakaku.com/%E7%A8%AE%20%E3%81%97%E3%81%84%E3%81%9F%E3%81%91%20%E8%8F%8C/",
             "category": "しいたけ",
         },
         # 春菊
         {
-            "id": "Shungiku",
+            "id": "8",
             "url": "https://www.kobayashi-seed.com/view/category/ct32",
             "category": "春菊",
         },
         {
-            "id": "Shungiku",
+            "id": "8",
             "url": "https://shop.takii.co.jp/category/00003461",
             "category": "春菊",
         },
         {
-            "id": "Shungiku_f",
+            "id": "8_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E5%8C%96%E6%88%90%E8%82%A5%E6%96%99+%E5%9C%92%E8%8A%B8+%E3%81%8A%E3%81%99%E3%81%99%E3%82%81/",
             "category": "春菊-肥料",
         },
         # 西洋なし
         {
-            "id": "westernpear",
+            "id": "9",
             "url": "https://search.kakaku.com/%E8%8B%97%20%E8%A5%BF%E6%B4%8B%E6%A2%A8/",
             "category": "西洋なし",
         },
         {
-            "id": "westernpear_f",
+            "id": "9_f",
             "url": "https://shop.takii.co.jp/product/catalog/kw/%E6%9E%9C%E6%A8%B9%E5%AE%9F%E7%89%A9%E5%B0%82%E7%94%A8%E8%82%A5%E6%96%99",
             "category": "西洋なし-肥料",
         },
         # にら
         {
-            "id": "Chinesechive",
+            "id": "10",
             "url": "https://www.tanehyo.jp/view/category/ct27",
             "category": "にら",
         },
         {
-            "id": "Chinesechive",
+            "id": "10",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%83%8B%E3%83%A9+%E7%A8%AE/",
             "category": "にら",
         },
         {
-            "id": "Chinesechive_f",
+            "id": "10_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%83%8B%E3%83%A9+%E6%A0%BD%E5%9F%B9+%E8%82%A5%E6%96%99/",
             "category": "にら-肥料",
         },
         # 花わさび
         {
-            "id": "flowerwasabi",
+            "id": "11",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%82%8F%E3%81%95%E3%81%B3+%E7%A8%AE/100012/",
             "category": "花わさび",
         },
         # ピーマン
         {
-            "id": "greenpepper",
+            "id": "12",
             "url": "https://shop.takii.co.jp/category/00008407",
             "category": "ピーマン",
         },
         {
-            "id": "greenpepper",
+            "id": "12",
             "url": "https://search.rakuten.co.jp/search/mall/%E7%A8%AE+%E3%83%94%E3%83%BC%E3%83%9E%E3%83%B3/",
             "category": "ピーマン",
         },
         {
-            "id": "greenpepper_f",
+            "id": "12_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%83%94%E3%83%BC%E3%83%9E%E3%83%B3+%E8%82%A5%E6%96%99/",
             "category": "ピーマン-肥料",
         },
         # ぶどう
         {
-            "id": "grapes",
+            "id": "13",
             "url": "https://shop.takii.co.jp/category/00004057",
             "category": "ぶどう",
         },
         {
-            "id": "grapes",
+            "id": "13",
             "url": "https://search.kakaku.com/%E3%83%96%E3%83%89%E3%82%A6%20%E8%8B%97/",
             "category": "ぶどう",
         },
         {
-            "id": "grapes_f",
+            "id": "13_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%81%B6%E3%81%A9%E3%81%86+%E8%82%A5%E6%96%99/",
             "category": "ぶどう-肥料",
         },
         # もも
         {
-            "id": "peach",
+            "id": "14",
             "url": "https://shop.takii.co.jp/category/00004064",
             "category": "もも",
         },
         {
-            "id": "peach",
+            "id": "14",
             "url": "https://www.hanahiroba.com/c/0000000100/0000000101/0000000128?srsltid=AfmBOopfZ-Nwg6CuLyy_Llcwf3L2lKbFNdXlspLt5iWYNxMAx4KVLzls",
             "category": "もも",
         },
         {
-            "id": "peach_f",
+            "id": "14_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E6%A1%83+%E8%82%A5%E6%96%99/",
             "category": "もも-肥料",
         },
         # りんご
         {
-            "id": "apple",
+            "id": "15",
             "url": "https://shop.takii.co.jp/category/00004069",
             "category": "りんご",
         },
         {
-            "id": "apple",
+            "id": "15",
             "url": "https://www.hanahiroba.com/c/0000000100/0000000135/0000000146?srsltid=AfmBOoow1SiZxqgbJ-SLjuxgAeUdBu1WDq8YUTqy5tF_NM70NDKGTfMa",
             "category": "りんご",
         },
         {
-            "id": "apple_f",
+            "id": "15_f",
             "url": "https://search.rakuten.co.jp/search/mall/%E3%82%8A%E3%82%93%E3%81%94%E8%82%A5%E6%96%99/",
             "category": "りんご-肥料",
         },
