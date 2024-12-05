@@ -3,6 +3,7 @@ from scrapy.crawler import CrawlerProcess
 from bs4 import BeautifulSoup
 import re
 from collections import defaultdict
+from json import dumps
 
 
 class AgricultureSpider(scrapy.Spider):
@@ -442,13 +443,16 @@ class AgricultureSpider(scrapy.Spider):
         return prices
 
     def closed(self, reason):
+        result = []
         # スクレイピング終了後、平均価格を計算して出力
-        for url_id, prices in self.prices_by_id.items():
+        for id, prices in self.prices_by_id.items():
             if prices:
                 average_price = sum(prices) / len(prices)
-                print(f"ID: {url_id}, 平均価格: {average_price:.2f}円")
+                item = {"id": id, "price": round(average_price, 2)}
+                result.append(item)
             else:
-                print(f"ID: {url_id}, 価格情報が見つかりませんでした。")
+                print(f"ID: {id}, 価格情報が見つかりませんでした。")
+        print(dumps(result))
 
 
 if __name__ == "__main__":
