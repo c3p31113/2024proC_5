@@ -3,7 +3,7 @@ from docx.document import Document as DocumentObject
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import datetime
 from os import makedirs
-from classes import Form
+from classes import Form, Product
 from logging import getLogger
 
 logger = getLogger("uvicorn.app")
@@ -60,11 +60,13 @@ def main(form: Form, doc: DocumentObject = DOC):
     #     print("".join(row_text).replace("\u3000", "_"))
 
     # 計算式@マークの部分はDBから受け取る
+    income: float = 0
+    products: list[Product] = []
     for productinform in form.product_array:
         product = productinform.get_product()
-        pass
         if product is None:
             continue
+        products.append(product)
         yen_per_kg: int = product.yen_per_kg
         kg_per_1a = product.kg_per_1a
         cost = 0
@@ -74,57 +76,36 @@ def main(form: Form, doc: DocumentObject = DOC):
         # 農業粗収益 = 生産量 * @単価
         gross_profit = pro_amount * yen_per_kg
         # 農業所得 = 農業粗収益 - @農業経営費
-        income = gross_profit - cost
+        incomeperproduct = gross_profit - cost
+        income += incomeperproduct
 
-    new_text_list1 = ["ジャガ", "10a", "1000kg"]
-    new_text_list2 = ["人参", "8a", "800kg"]
-    new_text_list3 = ["", "", ""]
-    new_text_list4 = ["", "", ""]
-    new_text_list5 = ["", "", ""]
-    new_text_list6 = ["", "", ""]
-    new_text_list7 = ["", "", ""]
-    new_text_list8 = ["", "", ""]
+    new_text_lists = [[""] * 3] * 8
+    for i in range(8):
+        try:
+            product = form.product_array[i]
+        except IndexError:
+            break
+        product_hoge = product.get_product()
+        if product_hoge is None:
+            continue
+        new_text_list = []
+        new_text_list.append(product_hoge.name)
+        new_text_list.append(f"{product.amount}a")
+        new_text_list.append(f"{product.amount}kg")
+        new_text_lists[i] = new_text_list
 
     replace_words = ["作物", "面積", "生産量"]
     replace_lists = []
     for i in range(8):
         replace_list = []
         for word in replace_words:
-            replace_list.append(f"{word}{i+1}")
+            replace_word = f"{word}{i+1}"
+            replace_list.append(replace_word)
         replace_lists.append(replace_list)
 
-    replace_List1 = ["作物１", "面積１", "生産量１"]
-    replace_List2 = ["作物２", "面積２", "生産量２"]
-    replace_List3 = ["作物３", "面積３", "生産量３"]
-    replace_List4 = ["作物４", "面積４", "生産量４"]
-    replace_List5 = ["作物５", "面積５", "生産量５"]
-    replace_List6 = ["作物６", "面積６", "生産量６"]
-    replace_List7 = ["作物７", "面積７", "生産量７"]
-    replace_List8 = ["作物８", "面積８", "生産量８"]
-
-    for i in range(len(replace_List1)):
-        table_replace(replace_List1[i], str(new_text_list1[i]))
-
-    for i in range(len(replace_List2)):
-        table_replace(replace_List2[i], str(new_text_list2[i]))
-
-    for i in range(len(replace_List3)):
-        table_replace(replace_List3[i], str(new_text_list3[i]))
-
-    for i in range(len(replace_List4)):
-        table_replace(replace_List4[i], str(new_text_list4[i]))
-
-    for i in range(len(replace_List5)):
-        table_replace(replace_List5[i], str(new_text_list5[i]))
-
-    for i in range(len(replace_List6)):
-        table_replace(replace_List6[i], str(new_text_list6[i]))
-
-    for i in range(len(replace_List7)):
-        table_replace(replace_List7[i], str(new_text_list7[i]))
-
-    for i in range(len(replace_List8)):
-        table_replace(replace_List8[i], str(new_text_list8[i]))
+    for i in range(8):
+        for n in range(3):
+            table_replace(replace_lists[i][n], new_text_lists[i][n])
 
         # 年間農業粗収益を入力
         table_replace("@income", str(income))
