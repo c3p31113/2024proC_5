@@ -122,7 +122,7 @@ def main(form: Form, doc: DocumentObject = DOC):
         table_replace("@income", str(income))
 
         # TODO 常時雇いの見通し人数（年間）
-        table_replace("@人数","")
+        table_replace("@人数","ここに人数をお願いします")
 
     # 農業粗収益
     table_replace("農業粗収益の計算", str())
