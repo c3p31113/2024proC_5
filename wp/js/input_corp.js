@@ -53,20 +53,20 @@ async function submitCropForm() {
         const inputExists = container.querySelector('input[name="area"]');
         console.log(selectExists, inputExists); // select と input が存在するか確認
         return selectExists && inputExists;
-});
+    });
 
-console.log(validContainers); // フィルタリング後の validContainers を確認
+    console.log(validContainers); // フィルタリング後の validContainers を確認
 
-const crops = validContainers.map(container => {
-    const selectValue = container.querySelector('select').value;
-    const areaValue = container.querySelector('input[name="area"]').value;
-    console.log(selectValue, areaValue); // 値を確認
-    return {
-        id: parseInt(selectValue, 10), // 選択した product.id を取得
-        amount: parseFloat(areaValue) || 0 // 面積
-    };
-});
-console.log(crops); // 最終的に作成された crops を確認
+    const crops = validContainers.map(container => {
+        const selectValue = container.querySelector('select').value;
+        const areaValue = container.querySelector('input[name="area"]').value;
+        console.log(selectValue, areaValue); // 値を確認
+        return {
+            id: parseInt(selectValue, 10), // 選択した product.id を取得
+            amount: parseFloat(areaValue) || 0 // 面積
+        };
+    });
+    console.log(crops); // 最終的に作成された crops を確認
 
     // データ送信
     try {
@@ -98,9 +98,9 @@ console.log(crops); // 最終的に作成された crops を確認
         console.log("Form submitted successfully:", formData);
 
         window.location.href = "sd5_result.html";  // ページ遷移
-        } catch (error) {
-            console.error("Error submitting the form:", error);
-        }
+    } catch (error) {
+        console.error("Error submitting the form:", error);
+    }
 }
 
 // フォームの送信ボタンにイベントリスナーを追加
