@@ -74,7 +74,7 @@ def main(form: Form, doc: DocumentObject = DOC):
         # 農業粗収益 = 生産量 * @単価
         gross_profit = pro_amount * yen_per_kg
         # 農業所得 = 農業粗収益 - @農業経営費
-        income = pro_amount - cost
+        income = gross_profit - cost
 
     new_text_list1 = ["ジャガ", "10a", "1000kg"]
     new_text_list2 = ["人参", "8a", "800kg"]
