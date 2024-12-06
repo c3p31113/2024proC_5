@@ -121,7 +121,7 @@ def main(form: Form, doc: DocumentObject = DOC):
         # 年間農業粗収益を入力
         table_replace("@income", str(income))
 
-        # 常時雇いの見通し人数（年間）
+        # TODO 常時雇いの見通し人数（年間）
         table_replace("@人数","")
 
     # 農業粗収益
