@@ -97,7 +97,7 @@ async function submitCropForm() {
         let result = await postForm(formData);
         console.log("Form submitted successfully:", formData);
 
-        window.location.href = "sd5_result.html";  // ページ遷移
+        window.location.href = "sd5_result.html?id=0";  // ページ遷移
     } catch (error) {
         console.error("Error submitting the form:", error);
     }
