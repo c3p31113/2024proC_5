@@ -5,8 +5,6 @@ window.onload = function () {
     Main();
 }
 
-//TODO await downloadResult();
-
 function populateScraperResult(products, scraped) {
     // scraperResult の要素を取得
     const scraperResult = document.getElementById("scraperResult");

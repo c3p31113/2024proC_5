@@ -8,6 +8,7 @@
  * @typedef {{id: number, email_address: string, form_id: number | null, title : string, content: string}} Contact
  * @typedef {{message: string, body: Array<Product>}} APIResponseProducts
  * @typedef {{message: string, body: Product}} APIResponseProduct
+ * @typedef {{message: string, body: {lastrowid: number}}} APIResponsePostForm
  * @typedef {{message: string, body: Array<ProductCategory>}} APIResponsePProductCategories
  * @typedef {{message: string, body: ProductCategory}} APIResponsePProductCategory
  * @typedef {{id: number, price: number}} ProductInScrape
@@ -58,12 +59,13 @@ export async function getScrape() {
 
 /**
  * @param {SendingForm} form
+ * @returns {Promise<APIResponsePostForm>}
  */
 export async function postForm(form) {
     if (typeof (form.manpower) != "number" || typeof (form.product_array) != "object") {
         console.error({ "message": "wrong form format", "form": form });
     }
-    post(form, "/v1/forms")
+    return (await post(form, "/v1/forms")).json()
 }
 
 /**
@@ -73,7 +75,7 @@ export async function postContact(contact) {
     if (typeof (contact.email_address) != "string" || typeof (contact.title) != "string" || typeof (contact.content) != "string") {
         console.error({ "message": "wrong form format", "form": contact });
     }
-    post(contact, "/v1/contacts")
+    await post(contact, "/v1/contacts")
 }
 
 export async function downloadResult() {

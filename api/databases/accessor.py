@@ -57,7 +57,7 @@ def insertInto(
     table: str,
     columns: list[str],
     values: list[str | int | None],
-) -> bool:
+) -> int | None:
     if len(columns) != len(values):
         logger.info("different len between columns and values")
         return False
@@ -81,10 +81,12 @@ def insertInto(
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
         logger.error(f"query failed to run: {query}")
-        return False
+        return None
     connection.commit()
+    # logger.info(cursor.lastrowid)
+    lastrowid = cursor.lastrowid
     cursor.close()
-    return True
+    return lastrowid
 
 
 def update(

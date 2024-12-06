@@ -178,8 +178,10 @@ def post_form(
     )
     connection.close()
     make_docer(form)
-    if result:
-        return RESPONSE_REQUEST_PROCESSED
+    if result is not None:
+        return APIResponse(
+            message="request was processed successfully.", body={"lastrowid": result}
+        )
     else:
         raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
 

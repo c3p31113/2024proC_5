@@ -29,7 +29,7 @@ DOC = open_docx("api/Test.docx")
 def main(form: Form, doc: DocumentObject = DOC):
     # print("段落の個数:", len(doc.paragraphs))
 
-    print("表の個数:", len(doc.tables))
+    # print("表の個数:", len(doc.tables))
 
     # # Docファイルの内容を表示
     # num = 0
@@ -84,6 +84,14 @@ def main(form: Form, doc: DocumentObject = DOC):
     new_text_list6 = ["", "", ""]
     new_text_list7 = ["", "", ""]
     new_text_list8 = ["", "", ""]
+
+    replace_words = ["作物", "面積", "生産量"]
+    replace_lists = []
+    for i in range(8):
+        replace_list = []
+        for word in replace_words:
+            replace_list.append(f"{word}{i+1}")
+        replace_lists.append(replace_list)
 
     replace_List1 = ["作物１", "面積１", "生産量１"]
     replace_List2 = ["作物２", "面積２", "生産量２"]

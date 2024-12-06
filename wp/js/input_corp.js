@@ -94,7 +94,7 @@ async function submitCropForm() {
         };
 
         // データ送信
-        await postForm(formData);
+        let result = await postForm(formData);
         console.log("Form submitted successfully:", formData);
 
         window.location.href = "sd5_result.html";  // ページ遷移
