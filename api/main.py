@@ -178,8 +178,10 @@ def post_form(
     )
     connection.close()
     make_docer(form)
-    if result:
-        return RESPONSE_REQUEST_PROCESSED
+    if result is not None:
+        return APIResponse(
+            message="request was processed successfully.", body={"lastrowid": result}
+        )
     else:
         raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
 
@@ -253,11 +255,11 @@ async def read_admin_me(
     return current_admin
 
 
-@app.get("/v1/update_price")
-async def update_price(
+@app.get("/v1/scrape")
+async def get_scrape(
     # current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
-    FILENAME = "./tmp/test.json"
+    FILENAME = "./tmp/output.json"
     # shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
     logger.info("scraped.")
     with open(FILENAME, mode="r") as file:

@@ -57,7 +57,7 @@ def insertInto(
     table: str,
     columns: list[str],
     values: list[str | int | None],
-) -> bool:
+) -> int | None:
     if len(columns) != len(values):
         logger.info("different len between columns and values")
         return False
@@ -69,11 +69,9 @@ def insertInto(
             continue
         if type(value) is int or (type(value) is str and value.isdecimal()):
             value_result.append(str(value))
-        # elif type(value) is str and (
-        #     not value.startswith('"') and not value.endswith('"')
-        # ):
-        # FIXME 暫定処置！！！
-        elif type(value) is str:
+        elif type(value) is str and (
+            not value.startswith('"') and not value.endswith('"')
+        ):
             value_result.append(f'"{value}"')
         columns_result.append(columns[i])
         continue
@@ -83,10 +81,12 @@ def insertInto(
         cursor.execute(query)
     except MYSQLerrors.ProgrammingError:
         logger.error(f"query failed to run: {query}")
-        return False
+        return None
     connection.commit()
+    # logger.info(cursor.lastrowid)
+    lastrowid = cursor.lastrowid
     cursor.close()
-    return True
+    return lastrowid
 
 
 def update(

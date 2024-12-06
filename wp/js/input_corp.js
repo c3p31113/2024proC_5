@@ -1,28 +1,10 @@
 import { getProducts, postForm } from "./APIaccessor.js";
 
 window.onload = function () {
-    loadCropOptions("cropinput");
     document.getElementById('add-button').addEventListener('click', addCropArea);
 };
 
-async function loadCropOptions(products) {
-    const select = document.getElementById(products);
-    try {
-        const products = await getProducts();
-        console.log(products);
-        console.log(products.ID);
-        select.innerHTML = `<option value="0">---</option>`;
 
-        products.body.forEach(product => {
-            const option = document.createElement("option");
-            option.value = product.ID;
-            option.textContent = product.name;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error loading crop options:", error);
-    }
-}
 async function addCropArea() {
     const container = document.createElement('div');
     container.className = 'record-container';
@@ -71,20 +53,20 @@ async function submitCropForm() {
         const inputExists = container.querySelector('input[name="area"]');
         console.log(selectExists, inputExists); // select と input が存在するか確認
         return selectExists && inputExists;
-});
+    });
 
-console.log(validContainers); // フィルタリング後の validContainers を確認
+    console.log(validContainers); // フィルタリング後の validContainers を確認
 
-const crops = validContainers.map(container => {
-    const selectValue = container.querySelector('select').value;
-    const areaValue = container.querySelector('input[name="area"]').value;
-    console.log(selectValue, areaValue); // 値を確認
-    return {
-        id: parseInt(selectValue, 10), // 選択した product.id を取得
-        amount: parseFloat(areaValue) || 0 // 面積
-    };
-});
-console.log(crops); // 最終的に作成された crops を確認
+    const crops = validContainers.map(container => {
+        const selectValue = container.querySelector('select').value;
+        const areaValue = container.querySelector('input[name="area"]').value;
+        console.log(selectValue, areaValue); // 値を確認
+        return {
+            id: parseInt(selectValue, 10), // 選択した product.id を取得
+            amount: parseFloat(areaValue) || 0 // 面積
+        };
+    });
+    console.log(crops); // 最終的に作成された crops を確認
 
     // データ送信
     try {
@@ -112,13 +94,13 @@ console.log(crops); // 最終的に作成された crops を確認
         };
 
         // データ送信
-        await postForm(formData);
+        const result = (await postForm(formData)).body.lastrowid;
         console.log("Form submitted successfully:", formData);
 
-        window.location.href = "sd5_result.html";  // ページ遷移
-        } catch (error) {
-            console.error("Error submitting the form:", error);
-        }
+        window.location.href = `sd5_result.html?id=${result}`;  // ページ遷移
+    } catch (error) {
+        console.error("Error submitting the form:", error);
+    }
 }
 
 // フォームの送信ボタンにイベントリスナーを追加

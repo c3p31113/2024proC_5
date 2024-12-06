@@ -6,10 +6,13 @@
  * @typedef {{id: null, manpower: number, product_array : Array<ProductInForm>}} SendingForm
  * @typedef {{id: number, amount: number}} ProductInForm
  * @typedef {{id: number, email_address: string, form_id: number | null, title : string, content: string}} Contact
- * @typedef {{"message": string, body: Array<Product>}} APIResponseProducts
- * @typedef {{"message": string, body: Product}} APIResponseProduct
- * @typedef {{"message": string, body: Array<ProductCategory>}} APIResponsePProductCategories
- * @typedef {{"message": string, body: ProductCategory}} APIResponsePProductCategory
+ * @typedef {{message: string, body: Array<Product>}} APIResponseProducts
+ * @typedef {{message: string, body: Product}} APIResponseProduct
+ * @typedef {{message: string, body: {lastrowid: number}}} APIResponsePostForm
+ * @typedef {{message: string, body: Array<ProductCategory>}} APIResponsePProductCategories
+ * @typedef {{message: string, body: ProductCategory}} APIResponsePProductCategory
+ * @typedef {{id: number, price: number}} ProductInScrape
+ * @typedef {{message: string, body: Array<ProductInScrape>}} APIResponseScrape
 */
 /**
  * 
@@ -46,15 +49,23 @@ export async function getProductCategories() {
 export async function getProductCategory(id = 0) {
     return (await get(`/v1/productCategories/${id}`)).json()
 }
+/**
+ * 
+ * @returns {Promise<APIResponseScrape>}
+ */
+export async function getScrape() {
+    return (await get("/v1/scrape")).json();
+}
 
 /**
  * @param {SendingForm} form
+ * @returns {Promise<APIResponsePostForm>}
  */
 export async function postForm(form) {
     if (typeof (form.manpower) != "number" || typeof (form.product_array) != "object") {
         console.error({ "message": "wrong form format", "form": form });
     }
-    post(form, "/v1/forms")
+    return (await post(form, "/v1/forms")).json()
 }
 
 /**
@@ -64,7 +75,7 @@ export async function postContact(contact) {
     if (typeof (contact.email_address) != "string" || typeof (contact.title) != "string" || typeof (contact.content) != "string") {
         console.error({ "message": "wrong form format", "form": contact });
     }
-    post(contact, "/v1/contacts")
+    await post(contact, "/v1/contacts")
 }
 
 export async function downloadResult() {
@@ -97,7 +108,7 @@ async function get(path = "/") {
     })
 }
 
-async function post(content, path = getAPIhost()) {
+async function post(content, path = "/") {
     return await fetch(getAPIhost() + path, {
         method: "POST",
         headers: {
