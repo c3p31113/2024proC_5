@@ -1,6 +1,7 @@
 import { getProducts, getScrape, downloadResult } from "./APIaccessor.js";
 
 window.onload = function () {
+    document.getElementById('downloadWord').addEventListener('click', downloadResult);
     Main();
 }
 
