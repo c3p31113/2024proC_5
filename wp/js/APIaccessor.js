@@ -108,7 +108,7 @@ async function get(path = "/") {
     })
 }
 
-async function post(content, path = getAPIhost()) {
+async function post(content, path = "/") {
     return await fetch(getAPIhost() + path, {
         method: "POST",
         headers: {

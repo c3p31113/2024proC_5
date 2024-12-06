@@ -94,10 +94,10 @@ async function submitCropForm() {
         };
 
         // データ送信
-        let result = await postForm(formData);
+        const result = (await postForm(formData)).body.lastrowid;
         console.log("Form submitted successfully:", formData);
 
-        window.location.href = "sd5_result.html?id=0";  // ページ遷移
+        window.location.href = `sd5_result.html?id=${result}`;  // ページ遷移
     } catch (error) {
         console.error("Error submitting the form:", error);
     }
