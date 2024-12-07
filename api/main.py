@@ -260,7 +260,7 @@ async def get_scrape(
     # current_admin: auth.Admin = Depends(auth.get_current_active_user),
 ):
     FILENAME = "./tmp/output.json"
-    # shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
+    shell(f"python api/scraper/agriculture_scraper.py => {FILENAME}")
     logger.info("scraped.")
     with open(FILENAME, mode="r") as file:
         scraped_data: list[dict] = load(file)
