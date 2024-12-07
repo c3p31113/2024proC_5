@@ -2,7 +2,7 @@ from docx import Document
 from docx.document import Document as DocumentObject
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import datetime
-from os import makedirs
+from os import makedirs, remove
 from classes import Form, Product
 from logging import getLogger
 
@@ -26,7 +26,8 @@ def open_docx(path: str) -> DocumentObject:
 DOC = open_docx("api/Test.docx")
 
 
-def main(form: Form, doc: DocumentObject = DOC):
+def main(form: Form, id: int, doc: DocumentObject = DOC):
+    remove("./tmp/Result.docx")
     # print("段落の個数:", len(doc.paragraphs))
 
     # print("表の個数:", len(doc.tables))
@@ -119,10 +120,9 @@ def main(form: Form, doc: DocumentObject = DOC):
 
     # 別名保存
     doc.save("./tmp/Result.docx")
-    print("./tmp/Result.docx に保存")
 
     # 保存後のファイル中身確認
-    doc = open_docx("./tmp/Result.docx")  # ファイル名とパスを正確に指定
+    # doc = open_docx("./tmp/Result.docx")  # ファイル名とパスを正確に指定
 
 
 def replace(len: int, old_text: str, new_text: str):
@@ -147,4 +147,4 @@ def table_replace(old_text: str, new_text: str):
 
 
 if __name__ == "__main__":
-    main(Form(id=5, product_array=[Form.ProductInForm(id=4, amount=3)], manpower=1))
+    main(Form(id=5, product_array=[Form.ProductInForm(id=4, amount=3)], manpower=1), 0)

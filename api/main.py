@@ -169,7 +169,7 @@ def post_form(
     logger.debug(form)
     result = insertInto(
         connection,
-        "form",
+        databaseliterals.DATABASE_TABLE_FORM,
         ["product_array", "manpower"],
         [
             f"{dumps(form.product_array, default=pydantic_encoder).replace('"', "\\\"")}",
@@ -177,7 +177,10 @@ def post_form(
         ],
     )
     connection.close()
-    make_docer(form)
+    logger.info(result)
+    if result is None:
+        raise EXCEPTION_REQUEST_FAILED_TO_PROCESS
+    make_docer(form, result)
     if result is not None:
         return APIResponse(
             message="request was processed successfully.", body={"lastrowid": result}
@@ -194,7 +197,7 @@ def post_contact(
     connection = connect()
     result = insertInto(
         connection,
-        "contacts",
+        databaseliterals.DATABASE_TABLE_CONTACTS,
         [
             "email_address",
             "form_id",
@@ -265,22 +268,25 @@ async def get_scrape(
     with open(FILENAME, mode="r") as file:
         scraped_data: list[dict] = load(file)
     for product in scraped_data:
-        update(
-            connection=connect(),
-            table=databaseliterals.DATABASE_TABLE_PRODUCTS,
-            column="yen_per_kg",
-            value=product["price"],
-            where=f"id={product["id"]}",
-        )
+        # update(
+        #     connection=connect(),
+        #     table=databaseliterals.DATABASE_TABLE_PRODUCTS,
+        #     column="yen_per_kg",
+        #     value=product["price"],
+        #     where=f"id={product["id"]}",
+        # )
+        pass
     return APIResponse(message="ok", body=scraped_data)
 
 
 @app.get("/v1/get_file")
-async def get_result_file(_request: None = Depends(log_accessor)) -> FileResponse:
+async def get_result_file(
+    id: int, _request: None = Depends(log_accessor)
+) -> FileResponse:
     return FileResponse(
         headers={"Content-Disposition": "attachment;"},
-        path="./tmp/Result.docx",
-        filename="result.docx",
+        path=f"./tmp/results/Result_{id}.docx",
+        filename=f"result_{id}.docx",
     )
 
 
