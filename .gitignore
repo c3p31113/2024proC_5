@@ -21,3 +21,4 @@ phpMyAdmin**
 
 config/*
 !config/log_config.yaml
+api/~$Test.docx

@@ -8,6 +8,7 @@
         "**/.gitignore": false,
         ".vscode/**": false,
         ".venv": true,
+        "**/__pycache__": true
     },
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
