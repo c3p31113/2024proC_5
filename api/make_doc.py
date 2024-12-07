@@ -108,7 +108,7 @@ def main(form: Form, doc: DocumentObject = DOC):
             table_replace(replace_lists[i][n], new_text_lists[i][n])
 
         # 年間農業粗収益を入力
-        table_replace("@income", str(income))
+        table_replace("@income", str(income / 1000))
 
         # 常時雇いの見通し人数（年間）
         table_replace("@人数", str(form.manpower))
