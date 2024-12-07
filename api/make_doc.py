@@ -23,11 +23,33 @@ def open_docx(path: str) -> DocumentObject:
 
 
 # Wordファイルを開く
-DOC = open_docx("api/Test.docx")
 
 
-def main(form: Form, id: int, doc: DocumentObject = DOC):
-    remove("./tmp/Result.docx")
+def main(form: Form, id: int):
+    doc = open_docx("api/Test.docx")
+
+    def replace(len: int, old_text: str, new_text: str):
+        rep = doc.paragraphs[len]
+        t = rep.text
+        t = t.replace(old_text, new_text)
+        rep.text = t
+        return
+
+    # 表の中の文字を置き換える
+    def table_replace(old_text: str, new_text: str):
+        for table in doc.tables:  # 文書内のすべての表をループ
+            for row in table.rows:  # 各表のすべての行をループ
+                for cell in row.cells:  # 各行のすべてのセルをループ
+                    # 結合されたセルの最初のセルでのみテキストを置き換え
+                    if (
+                        cell.text and old_text in cell.text
+                    ):  # テキストが空でない場合に置き換え
+                        cell.text = cell.text.replace(old_text, new_text)
+        return
+
+    logger.warning(f"manpower: {form.manpower}")
+    logger.warning(f"product_array: {form.product_array}")
+    # remove("./tmp/Result.docx")
     # print("段落の個数:", len(doc.paragraphs))
 
     # print("表の個数:", len(doc.tables))
@@ -116,34 +138,15 @@ def main(form: Form, id: int, doc: DocumentObject = DOC):
 
     # 農業粗収益
     table_replace("農業粗収益の計算", str())
-    makedirs("./tmp/", exist_ok=True)
+    makedirs("./tmp/results", exist_ok=True)
 
     # 別名保存
-    doc.save("./tmp/Result.docx")
+    filename = f"./tmp/results/Result_{id}.docx"
+    doc.save(filename)
+    print(f"{filename} に保存")
 
     # 保存後のファイル中身確認
     # doc = open_docx("./tmp/Result.docx")  # ファイル名とパスを正確に指定
-
-
-def replace(len: int, old_text: str, new_text: str):
-    rep = DOC.paragraphs[len]
-    t = rep.text
-    t = t.replace(old_text, new_text)
-    rep.text = t
-    return
-
-
-# 表の中の文字を置き換える
-def table_replace(old_text: str, new_text: str):
-    for table in DOC.tables:  # 文書内のすべての表をループ
-        for row in table.rows:  # 各表のすべての行をループ
-            for cell in row.cells:  # 各行のすべてのセルをループ
-                # 結合されたセルの最初のセルでのみテキストを置き換え
-                if (
-                    cell.text and old_text in cell.text
-                ):  # テキストが空でない場合に置き換え
-                    cell.text = cell.text.replace(old_text, new_text)
-    return
 
 
 if __name__ == "__main__":

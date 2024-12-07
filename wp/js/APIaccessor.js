@@ -79,7 +79,11 @@ export async function postContact(contact) {
 }
 
 export async function downloadResult() {
-    const response = await fetch(getAPIhost() + "/v1/get_file", {
+    const lastrowid = new URL(document.location).searchParams.get("id")
+    console.log(lastrowid)
+    const query = getAPIhost() + `/v1/get_file?id=${lastrowid}`
+    console.log(query)
+    const response = await fetch(query, {
         method: "GET",
         headers: {
             "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -91,7 +95,7 @@ export async function downloadResult() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "result.docx";
+        a.download = `result_${lastrowid}.docx`;
         a.click();
     }
 }
