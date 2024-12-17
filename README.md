@@ -53,7 +53,7 @@ pip install -r requirements.txt
 - フォアグラウンドで実行されます
 #### mariadb
 - コンフィグファイル(my.cnf)の位置は、 server.bash:5の mariadbConfigFilePath 変数で指定されています
-- 実のところ実行環境ではコンフィグファイルの中身はほぼ空です　プロジェクト別でサーバーを全く別にしたかっただけなので、混ざらないようなら指定もいらないかも
+- 実のところ実行環境ではコンフィグファイルの中身はほぼ空です　プロジェクト別でサーバーを全く別にしたかっただけなので、データベースが混ざらないようなら指定もいらないかも
 
 ### 実行
 - bashが使用可能な環境であれば、server.bashを使用してサーバーの起動と終了が可能です
@@ -68,3 +68,44 @@ pip install -r requirements.txt
   - grep
 - server.bashを利用せずにXAMPPを使用しても、apacheとmariadbが使用するディレクトリを指定すればほぼほぼ動くと思います
 - fastapiが使用するポートは3000です ./api/main.py:28 の PORT 変数で指定されています
+
+
+
+### コンフィグファイルの構造
+- db.config
+```json
+{
+    "host": "localhost",
+    "user": "#ユーザー名",
+    "password": "#パスワード",
+    "database": "#データベース名"
+}
+```
+- log_config.yaml
+```yaml
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+loggers:
+  uvicorn:
+    handlers:
+    - console
+    level: DEBUG
+```
+secretKey.txt
+```
+****************************************************************
+
+```
+秘密鍵は
+```shell
+openssl rand -hex 32
+```
+で生成
