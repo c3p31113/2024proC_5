@@ -66,7 +66,7 @@ pip install -r requirements.txt
   - ps
   - tail
   - grep
-- server.bashを利用せずにXAMPPを使用しても、apacheとmariadbが使用するディレクトリを指定すればほぼほぼ動くと思います
+- server.bashを利用せずにXAMPPを使用しても、apache用ディレクトリ(wp)を指定すればほぼほぼ動くと思います
 - fastapiが使用するポートは3000です ./api/main.py:28 の PORT 変数で指定されています
 
 
@@ -106,6 +106,6 @@ secretKey.txt
 ```
 秘密鍵は
 ```shell
-openssl rand -hex 32
+openssl rand -hex 32 > ./secretKey.txt
 ```
 で生成
