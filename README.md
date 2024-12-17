@@ -11,3 +11,60 @@
 ### 概要
 - 文教大学湘南キャンパス、情報学部情報システム学科、プロジェクト演習グループ5(E)「福島県伊達市に向けた新規就農者向け書類作成補助システム開発プロジェクト」の開発リポジトリです
 - 主な開発言語はPython、JavaScript
+
+- 主要なファイル構造は以下の通りです
+```
+./
+├── api/    fastapiサーバーが使用するカレントディレクトリ
+│   ├── main.py    fasatpiの本体です
+│   ├── make_doc.py    wordファイルを編集し出力します
+│   ├── scraper/    スクレイピング関連
+│   │   └── agriculture_scraper.py    スクレイピングの本体です
+│   ├── security/    認証関連
+│   │   └── authenticate.py    認証機能の本体です
+│   └── accessor/    データベース関連
+│       └── accessor.py    データベース接続の本体ファイルです
+├── wp/    apacheサーバーが使用するカレントディレクトリ
+├── tmp/
+│   └── results/   make_docの実行結果のwordファイルが置かれます
+├── config/
+│   ├── dbconfig.json    データベースへの接続時に使用します
+│   ├── httpd.conf    apacheサーバーコンフィグファイルです
+│   ├── log_config.yaml    fastapiが使用するlogger用コンフィグです
+│   ├── my.cnf    mariadbコンフィグファイルです
+│   └── secretKey.txt    APIの認証機能で使用する秘密鍵です　1行の平文テキストです
+└── server.bash    サーバーを起動、終了するバッチです
+```
+
+### 構築
+- apacheサーバー、python環境、sqlサーバーの構築が必要です
+#### apache
+- コンフィグファイル(httpd.conf)の位置は、server.bash:4の apacheConfigFilePath 変数で指定されています
+- PHPのバージョンは8.3です
+- DocumentRootで./wpディレクトリを指定するようにしてください
+#### python
+- バージョンは3.12です
+- 特にserver.bashからの起動では、venvの使用を想定しています
+- 必要なモジュールはrequirements.txtにまとめてあります
+```shell
+pip install -r requirements.txt
+```
+- ./api/main.py を実行するとサーバーが起動します
+- フォアグラウンドで実行されます
+#### mariadb
+- コンフィグファイル(my.cnf)の位置は、 server.bash:5の mariadbConfigFilePath 変数で指定されています
+- 実のところ実行環境ではコンフィグファイルの中身はほぼ空です　プロジェクト別でサーバーを全く別にしたかっただけなので、混ざらないようなら指定もいらないかも
+
+### 実行
+- bashが使用可能な環境であれば、server.bashを使用してサーバーの起動と終了が可能です
+- server.bash で呼ばれるソフトウェア
+  - tmux
+  - awk
+  - sed
+  - ifconfig
+  - curl
+  - ps
+  - tail
+  - grep
+- server.bashを利用せずにXAMPPを使用しても、apacheとmariadbが使用するディレクトリを指定すればほぼほぼ動くと思います
+- fastapiが使用するポートは3000です ./api/main.py:28 の PORT 変数で指定されています
