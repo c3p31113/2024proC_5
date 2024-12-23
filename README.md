@@ -42,6 +42,7 @@
 - コンフィグファイル(httpd.conf)の位置は、server.bash:4の apacheConfigFilePath 変数で指定されています
 - PHPのバージョンは8.3です
 - DocumentRootで./wpディレクトリを指定するようにしてください
+- npmパッケージにはjqueryの型補完だけ入れている(しかも使ってない)ため、インストールする必要はありません
 #### python
 - バージョンは3.12です
 - 特にserver.bashからの起動では、venvの使用を想定しています
@@ -51,6 +52,7 @@ pip install -r requirements.txt
 ```
 - ./api/main.py を実行するとサーバーが起動します
 - フォアグラウンドで実行されます
+- fastapiが使用するポートは3000です ./api/main.py:28 の PORT 変数で指定されています
 #### mariadb
 - コンフィグファイル(my.cnf)の位置は、 server.bash:5の mariadbConfigFilePath 変数で指定されています
 - 実のところ実行環境ではコンフィグファイルの中身はほぼ空です　プロジェクト別でサーバーを全く別にしたかっただけなので、データベースが混ざらないようなら指定もいらないかも
@@ -67,8 +69,8 @@ pip install -r requirements.txt
   - tail
   - grep
 - server.bashを利用せずにXAMPPを使用しても、apache用ディレクトリ(wp)を指定すればほぼほぼ動くと思います
-- fastapiが使用するポートは3000です ./api/main.py:28 の PORT 変数で指定されています
-
+- http://127.0.0.1/ webサイト本体です
+- http://127.0.0.1:3000/docs/ fsatapiのドキュメントページです
 
 
 ### コンフィグファイルの構造
